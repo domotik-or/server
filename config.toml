@@ -1,0 +1,15 @@
+[general]
+
+[tcp-ip]
+port = 8080
+
+[logger]
+aiohttp = "WARNING"
+db = "DEBUG"
+queries = "DEBUG"
+
+[postgresql]
+hostname = "localhost"
+port = 5432
+username = "domotik"
+databasename = "domotik"

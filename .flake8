@@ -1,0 +1,4 @@
+[flake8]
+ignore = E501, W503, W504
+exclude = .git,.mypy_cache,.venv,__pycache__,logs
+max-complexity = 30
