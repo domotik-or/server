@@ -55,7 +55,7 @@ def get_common_parameters(request: web.Request) -> tuple[datetime, datetime]:
 async def linky_handle(request: web.Request) -> web.StreamResponse:
     start_date, end_date = get_common_parameters(request)
 
-    filename = f"linky-{datetime.now().strftime("%Y%m%d%H%M%S")}.csv"
+    filename = f"linky-{datetime.now().strftime('%Y%m%d%H%M%S')}.csv"
     response = web.StreamResponse(
         status=200,
         reason="OK",
@@ -86,7 +86,7 @@ async def linky_handle(request: web.Request) -> web.StreamResponse:
 async def onoff_handle(request: web.Request) -> web.StreamResponse:
     start_date, end_date = get_common_parameters(request)
 
-    filename = f"onoff-{datetime.now().strftime("%Y%m%d%H%M%S")}.csv"
+    filename = f"onoff-{datetime.now().strftime('%Y%m%d%H%M%S')}.csv"
     response = web.StreamResponse(
         status=200,
         reason="OK",
@@ -117,7 +117,7 @@ async def onoff_handle(request: web.Request) -> web.StreamResponse:
 async def pressure_handle(request: web.Request) -> web.StreamResponse:
     start_date, end_date = get_common_parameters(request)
 
-    filename = f"linky-{datetime.now().strftime("%Y%m%d%H%M%S")}.csv"
+    filename = f"pressure-{datetime.now().strftime('%Y%m%d%H%M%S')}.csv"
     response = web.StreamResponse(
         status=200,
         reason="OK",
@@ -148,7 +148,7 @@ async def pressure_handle(request: web.Request) -> web.StreamResponse:
 async def sonoff_snzb02p_handle(request: web.Request) -> web.StreamResponse:
     start_date, end_date = get_common_parameters(request)
 
-    filename = f"linky-{datetime.now().strftime("%Y%m%d%H%M%S")}.csv"
+    filename = f"snzb02p-{datetime.now().strftime('%Y%m%d%H%M%S')}.csv"
     response = web.StreamResponse(
         status=200,
         reason="OK",
@@ -200,7 +200,7 @@ async def startup(app):
 
 
 async def cleanup(app):
-    close_db()
+    await close_db()
 
 
 async def make_app():
@@ -251,6 +251,6 @@ if __name__ == "__main__":
 
     web.run_app(
         app,
-        host=app["config"]["http_server"]["host"],
-        port=int(app["config"]["http_server"]["port"])
+        host="0.0.0.0",
+        port=config.tcp_ip.port
     )

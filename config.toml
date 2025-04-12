@@ -1,7 +1,7 @@
 [general]
 
 [tcp-ip]
-port = 8080
+port = 8085
 
 [logger]
 aiohttp = "WARNING"
@@ -12,4 +12,4 @@ queries = "DEBUG"
 hostname = "localhost"
 port = 5432
 username = "domotik"
-databasename = "domotik"
+databasename = "domotiq"
