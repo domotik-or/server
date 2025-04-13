@@ -63,8 +63,8 @@ async def get_sonoff_snzb02p_records(
 ) -> AsyncGenerator[list[dict], None]:
     """Get the snzb02p data from the sonoff_snzb02p table"""
     query = (
-        "SELECT * FROM sonoff_snz02p "
-        "WHERE device=$1 AND date_time >= $2 AND date_time <= $3 "
+        "SELECT timestamp, humidity, temperature FROM sonoff_snzb02p "
+        "WHERE device=$1 AND timestamp >= $2 AND timestamp <= $3 "
         "ORDER BY timestamp;"
     )
     async for sss in get_many_rows(query, device, start_date, end_date):
