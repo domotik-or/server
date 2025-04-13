@@ -1,0 +1,18 @@
+[Unit]
+Description=Server
+StartLimitIntervalSec=300
+StartLimitBurst=5
+After=automations.service
+
+[Service]
+WorkingDirectory=/home/domotik/server
+Environment="PYTHONPATH=/home/domotik/server"
+ExecStart=/usr/bin/python3 /home/domotik/server/src/main.py
+User=domotik
+Group=domotik
+Restart=on-failure
+RestartSec=10s
+KillSignal=SIGINT
+
+[Install]
+WantedBy=multi-user.target
