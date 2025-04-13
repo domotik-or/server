@@ -147,6 +147,10 @@ async def pressure_handle(request: web.Request) -> web.StreamResponse:
 
 async def sonoff_snzb02p_handle(request: web.Request) -> web.StreamResponse:
     start_date, end_date = get_common_parameters(request)
+    try:
+        device = int(request.rel_url.query["device"])
+    except KeyError:
+        raise web.HTTPBadRequest(reason="device: missing parameter")
 
     filename = f"snzb02p-{datetime.now().strftime('%Y%m%d%H%M%S')}.csv"
     response = web.StreamResponse(
@@ -162,7 +166,7 @@ async def sonoff_snzb02p_handle(request: web.Request) -> web.StreamResponse:
     # send csv header
     await response.write("timestamp, east, sinst\n".encode())
 
-    async for sss in get_sonoff_snzb02p_records(start_date, end_date):
+    async for sss in get_sonoff_snzb02p_records(device, start_date, end_date):
         if len(sss) == 0:
             break
 

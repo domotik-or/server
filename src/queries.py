@@ -28,8 +28,8 @@ async def get_linky_records(
         "WHERE timestamp >= $1 AND timestamp <= $2 "
         "ORDER BY timestamp;"
     )
-    async for lks in get_many_rows(query, start_date, end_date):
-        yield [dict(e) for e in lks]
+    async for sss in get_many_rows(query, start_date, end_date):
+        yield [dict(e) for e in sss]
 
 
 async def get_onoff_records(
@@ -59,13 +59,13 @@ async def get_pressure_records(
 
 
 async def get_sonoff_snzb02p_records(
-    start_date: datetime, end_date: datetime
+    device: str, start_date: datetime, end_date: datetime
 ) -> AsyncGenerator[list[dict], None]:
     """Get the snzb02p data from the sonoff_snzb02p table"""
     query = (
         "SELECT * FROM sonoff_snz02p "
-        "WHERE timestamp >= $1 AND timestamp <= $2 "
+        "WHERE device=$1 AND date_time >= $2 AND date_time <= $3 "
         "ORDER BY timestamp;"
     )
-    async for lks in get_many_rows(query, start_date, end_date):
-        yield [dict(e) for e in lks]
+    async for sss in get_many_rows(query, device, start_date, end_date):
+        yield [dict(e) for e in sss]
