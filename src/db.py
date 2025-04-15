@@ -1,7 +1,8 @@
-from asyncpg import create_pool
-from asyncpg import Record
 import logging
 from typing import AsyncGenerator
+
+from asyncpg import create_pool
+from asyncpg import Record
 
 import config
 
