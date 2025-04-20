@@ -248,7 +248,7 @@ def sigterm_handler(_signo, _stack_frame):
     sys.exit(0)
 
 
-config.read("/home/domotik/config/server.toml")
+config.read("/home/domotik/.config/domotik/server.toml")
 app = make_app()
 
 

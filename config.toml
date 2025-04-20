@@ -1,5 +1,5 @@
 [general]
-dotenv_filename = "/home/domotik/config/dotenv-server"
+dotenv_filename = "/home/domotik/.config/domotik/server.env"
 
 [tcp-ip]
 port = 8085

@@ -7,7 +7,7 @@ After=automations.service
 [Service]
 WorkingDirectory=/home/domotik/server
 Environment="PYTHONPATH=/home/domotik/server"
-ExecStart=/home/domotik/.local/bin/server -c /home/domotik/config/server.toml
+ExecStart=/home/domotik/.local/bin/server -c /home/domotik/.config/domotik/server.toml
 User=domotik
 Group=domotik
 Restart=on-failure

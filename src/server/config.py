@@ -41,7 +41,7 @@ def read(config_filename: str):
 
     # store secrets in memory
     global secrets
-    load_dotenv(general.dotenv_filemname)
+    load_dotenv(general.dotenv_filename)
     secrets = SecretsConfig()
     for v in ("PGPASSWORD",):
         value = getenv(v)
