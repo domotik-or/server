@@ -1,0 +1,37 @@
+[project]
+name = "server"
+dynamic = ["version"]
+description = "This is the home automation server."
+authors = [{ name = "Franck Barbenoire", email = "fbarbenoire@gmail.com" }]
+readme = "README.rst"
+requires-python = ">=3.11"
+dependencies = [
+    "aiohttp==3.11.16",
+    "aiohttp-cors==0.8.1",
+    "asyncpg==0.30.0",
+    "python-dotenv==1.1.0"
+]
+license = "GPL-3.0-or-later"
+keywords = ["home automation", "server"]
+
+[project.urls]
+Homepage = "https://github.com/domotik-or/server"
+
+[build-system]
+requires = ["setuptools>=75.0"]
+build-backend = "setuptools.build_meta"
+
+[project.scripts]
+server = "server.main:main"
+
+[tool.mypy]
+python_version = 3.11
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.dynamic]
+version = {attr = "server.main.__version__"}
