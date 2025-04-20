@@ -6,11 +6,11 @@ import tomllib
 
 from dotenv import load_dotenv
 
-from typem import GeneralConfig
-from typem import LoggerConfig
-from typem import PostgresqlConfig
-from typem import SecretsConfig
-from typem import TcpIpConfig
+from server.typem import GeneralConfig
+from server.typem import LoggerConfig
+from server.typem import PostgresqlConfig
+from server.typem import SecretsConfig
+from server.typem import TcpIpConfig
 
 general = None
 loggers = {}
@@ -41,7 +41,7 @@ def read(config_filename: str):
 
     # store secrets in memory
     global secrets
-    load_dotenv()
+    load_dotenv(general.dotenv_filemname)
     secrets = SecretsConfig()
     for v in ("PGPASSWORD",):
         value = getenv(v)

@@ -12,13 +12,15 @@ import time
 from aiohttp import web
 import aiohttp_cors
 
-import config
-from queries import close as close_db
-from queries import init as init_db
-from queries import get_linky_records
-from queries import get_onoff_records
-from queries import get_pressure_records
-from queries import get_sonoff_snzb02p_records
+import server.config as config
+from server.queries import close as close_db
+from server.queries import init as init_db
+from server.queries import get_linky_records
+from server.queries import get_onoff_records
+from server.queries import get_pressure_records
+from server.queries import get_sonoff_snzb02p_records
+
+__version__ = "1.0.0"
 
 logger = logging.getLogger()
 stream_handler = StreamHandler(stream=sys.stdout)
@@ -246,11 +248,11 @@ def sigterm_handler(_signo, _stack_frame):
     sys.exit(0)
 
 
-config.read("config.toml")
+config.read("/home/domotik/config/server.toml")
 app = make_app()
 
 
-if __name__ == "__main__":
+def main():
     signal.signal(signal.SIGTERM, sigterm_handler)
 
     web.run_app(

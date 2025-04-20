@@ -4,7 +4,7 @@ from typing import AsyncGenerator
 from asyncpg import create_pool
 from asyncpg import Record
 
-import config
+import server.config as config
 
 _db_pool = None
 

@@ -17,7 +17,7 @@ class PostgresqlConfig:
 
 @dataclass
 class GeneralConfig:
-    pass
+    dotenv_filename: str
 
 
 @dataclass
