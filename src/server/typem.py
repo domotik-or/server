@@ -7,6 +7,10 @@ class BatteryEvent(IntEnum):
     CHARGE_50 = 1
 
 
+class DeviceConfig:
+    pass
+
+
 @dataclass
 class PostgresqlConfig:
     hostname: str

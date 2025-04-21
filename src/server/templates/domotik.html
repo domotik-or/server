@@ -6,8 +6,12 @@
 </head>
 
 <body>
-    <h1>Pressure / Linky</h1>
-    <img src="data:image/png;base64,{img_pressure_linky}"/>"
+    <div><img src="data:image/png;base64,{{ pressure_linky }}"/></div>
+
+    {% for img in snzb02p %}
+    <div><img src="data:image/png;base64,{{ img }}"/></div>
+    {% endfor %}
+
 </body>
 
 </html>

@@ -14,6 +14,7 @@ CREATE TABLE pressure (
     pressure REAL,
     timestamp TIMESTAMP(1) WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
 CREATE TABLE sonoff_snzb02p (
     device VARCHAR(30),
     humidity REAL,

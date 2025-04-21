@@ -3,64 +3,81 @@ from datetime import timedelta
 from io import BytesIO
 
 from dateutil import parser as dateparser
+import matplotlib
+import matplotlib.style
 from matplotlib.figure import Figure
 
-from server.query import get_all_linky_records
-from server.query import get_all_pressure_records
-from server.query import get_all_sonoff_snzb02p_records
+from server.queries import get_all_linky_records
+from server.queries import get_all_pressure_records
+from server.queries import get_all_sonoff_snzb02p_records
+
+
+def init():
+    matplotlib.set_loglevel("info")
 
 
 async def plot_pressure_linky():
-    fig = Figure()
-    # fig.style.use("ggplot")
+    matplotlib.style.use("ggplot")
+
+    fig = Figure(figsize=(10, 8))
+    plt1, plt2 = fig.subplots(2, 1)
 
     dts = []
     values = []
 
-    start_datetime = int((datetime.now() - timedelta(days=2)).timestamp())
-    await get_all_pressure_records(start_datetime, datetime.now())
+    start_datetime = datetime.now() - timedelta(days=2)
+    records = await get_all_pressure_records(start_datetime, datetime.now())
+    for r in records:
+        dts.append(r["timestamp"])
+        values.append(r["pressure"])
 
-    fig.subplot(2, 1, 1, fig_size=(10, 8))
-    fig.title("Pression")
-    fig.ylabel("hPa")
-    fig.plot(dts, values)
+    plt1.set_title("Pressure")
+    plt1.set_ylabel("hPa")
+    plt1.plot(dts, values)
 
     dts = []
     values = []
 
-    start_datetime = int((datetime.now() - timedelta(days=2)).timestamp())
-    await get_all_linky_records(start_datetime, datetime.now())
+    start_datetime = datetime.now() - timedelta(days=2)
+    records = await get_all_linky_records(start_datetime, datetime.now())
+    for r in records:
+        dts.append(r["timestamp"])
+        values.append(r["sinst"])
 
-    fig.subplot(2, 1, 2)
-    fig.title("Linky")
-    fig.ylabel("VA")
-    fig.plot(dts, values)
+    plt2.set_title("Linky")
+    plt2.set_ylabel("VA")
+    plt2.plot(dts, values)
 
     buf = BytesIO()
     fig.savefig(buf, format="png")
     return buf
 
 
-# for n, device in enumerate(config.device.snzb02p):
 async def plot_snzb02p(device: str):
-    fig = Figure()
+    fig = Figure(figsize=(10, 8))
+    fig.suptitle(device, fontsize=16)
+    plt1, plt2 = fig.subplots(2, 1, sharex=True)
 
     dts = []
     hmds = []
     tmps = []
-    start_datetime = int((datetime.now() - timedelta(days=2)).timestamp())
-    await get_all_sonoff_snzb02p_records(device, start_datetime, datetime.now())
+    start_datetime = datetime.now() - timedelta(days=2)
+    records = await get_all_sonoff_snzb02p_records(
+        device, start_datetime, datetime.now()
+    )
+    for r in records:
+        hmds.append(r["humidity"])
+        tmps.append(r["temperature"])
+        dts.append(r["timestamp"])
 
-    fig_, (ax1, ax2) = fig.subplots(2, 1, sharex=True, fig_size=(10, 8))
-    fig_.suptitle(device, fontsize=16)
 
-    ax1.plot(dts, hmds)
-    ax1.set_title("Humidity")
-    ax1.set_ylabel("%RH")
+    plt1.plot(dts, hmds)
+    plt1.set_title("Humidity")
+    plt1.set_ylabel("%RH")
 
-    ax2.plot(dts, tmps)
-    ax2.set_title("Temperature")
-    ax2.set_ylabel("°C")
+    plt2.plot(dts, tmps)
+    plt2.set_title("Temperature")
+    plt2.set_ylabel("°C")
 
     buf = BytesIO()
     fig.savefig(buf, format="png")

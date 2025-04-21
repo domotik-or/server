@@ -1,3 +1,14 @@
+Installing matplotlib
+=====================
+
+https://github.com/mesonbuild/meson/issues/14313#issuecomment-2814392556
+
+.. code-block:: console
+
+    pip install matplotlib
+    --config-settings=setup-args=--cross-file=/home/domotik/server/src/meson_cross_file
+    --break-system-packageso
+
 Packages to install
 ===================
 

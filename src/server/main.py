@@ -16,7 +16,9 @@ import aiohttp_cors
 import jinja2
 
 import server.config as config
+from server.graph import init as init_graph
 from server.graph import plot_pressure_linky
+from server.graph import plot_snzb02p
 from server.queries import close as close_db
 from server.queries import init as init_db
 from server.queries import get_linky_records
@@ -36,11 +38,19 @@ logger.setLevel(logging.DEBUG)
 
 @aiohttp_jinja2.template("domotik.html")
 async def default_handle(request: web.Request):
+    # pressure and linky
     buf = await plot_pressure_linky()
-    img_pressure_linky = base64.b64encode(buf.getbuffer()).decode("ascii")
-    return {
-        "img_pressure_linky": img_pressure_linky,
+    imgs = {
+        "pressure_linky": base64.b64encode(buf.getbuffer()).decode("ascii"),
+        "snzb02p": []
     }
+
+    # sonoff snzb02p
+    for device in config.device.snzb02p:
+        buf = await plot_snzb02p(device)
+        imgs["snzb02p"].append(base64.b64encode(buf.getbuffer()).decode("ascii"))
+
+    return imgs
 
 
 def get_common_parameters(request: web.Request) -> tuple[datetime, datetime]:
@@ -205,6 +215,7 @@ async def init():
 
 
 async def startup(app):
+    init_graph()
     await init_db()
 
     # setup_security(
