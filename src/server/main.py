@@ -1,18 +1,22 @@
 #!/usr/bin/env python3
 
+import base64
 from datetime import datetime
 import importlib
 import logging
 from logging import StreamHandler
-# from pathlib import Path
+from pathlib import Path
 import signal
 import sys
 import time
 
 from aiohttp import web
+import aiohttp_jinja2
 import aiohttp_cors
+import jinja2
 
 import server.config as config
+from server.graph import plot_pressure_linky
 from server.queries import close as close_db
 from server.queries import init as init_db
 from server.queries import get_linky_records
@@ -30,8 +34,13 @@ logger.addHandler(stream_handler)
 logger.setLevel(logging.DEBUG)
 
 
-async def default_handle(request: web.Request) -> web.Response:
-    return web.HTTPOk()
+@aiohttp_jinja2.template("domotik.html")
+async def default_handle(request: web.Request):
+    buf = await plot_pressure_linky()
+    img_pressure_linky = base64.b64encode(buf.getbuffer()).decode("ascii")
+    return {
+        "img_pressure_linky": img_pressure_linky,
+    }
 
 
 def get_common_parameters(request: web.Request) -> tuple[datetime, datetime]:
@@ -231,12 +240,13 @@ async def make_app():
     for route in list(app.router.routes()):
         cors.add(route)
 
-    # path = Path(__file__).parents[0]
-    # template_dir = Path(path, "templates")
-    # aiohttp_jinja2.setup(
-    #     app,
-    #     loader=FileSystemLoader(template_dir),
-    # )
+    # configure jinja2
+    path = Path(__file__).parents[0]
+    template_dir = Path(path, "templates")
+    aiohttp_jinja2.setup(
+        app,
+        loader=jinja2.FileSystemLoader(template_dir)
+    )
 
     app.on_startup.append(startup)
     app.on_cleanup.append(cleanup)

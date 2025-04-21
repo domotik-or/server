@@ -19,7 +19,8 @@ async def attach_db():
     if _db_pool is None:
         dsn = (
             f"postgres://{config.postgresql.username}:{config.secrets.pgpassword}"
-            f"@{config.postgresql.hostname}:{config.postgresql.port}/{config.postgresql.databasename}"
+            f"@{config.postgresql.hostname}:{config.postgresql.port}/"
+            f"{config.postgresql.databasename}"
         )
         _db_pool = await create_pool(dsn=dsn)
 
@@ -31,7 +32,9 @@ async def get_rows(query: str, *args):
                 return await conn.fetch(query, *args)
 
 
-async def get_many_rows(query: str, *args, records_number: int = 100) -> AsyncGenerator[list[Record], None]:
+async def get_many_rows(
+    query: str, *args, records_number: int = 100
+) -> AsyncGenerator[list[Record], None]:
     async with _db_pool.acquire() as conn:  # type: ignore[union-attr]
         async with conn.transaction():
             cursor = await conn.cursor(query, *args)
