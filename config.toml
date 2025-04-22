@@ -8,8 +8,8 @@ port = 8085
 aiohttp = "WARNING"
 
 [logger.server]
-db = "DEBUG"
-queries = "DEBUG"
+db = "INFO"
+queries = "INFO"
 
 [postgresql]
 hostname = "localhost"

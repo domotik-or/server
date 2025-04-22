@@ -37,7 +37,7 @@ def read(config_filename: str):
     postgresql = PostgresqlConfig(**raw_config["postgresql"])
 
     global loggers
-    loggers = raw_config["logger"]:
+    loggers = raw_config["logger"]
 
     global tcp_ip
     tcp_ip = TcpIpConfig(**raw_config["tcp-ip"])
