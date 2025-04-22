@@ -6,6 +6,8 @@ port = 8085
 
 [logger]
 aiohttp = "WARNING"
+
+[logger.server]
 db = "DEBUG"
 queries = "DEBUG"
 

@@ -8,7 +8,6 @@ from dotenv import load_dotenv
 
 from server.typem import DeviceConfig
 from server.typem import GeneralConfig
-from server.typem import LoggerConfig
 from server.typem import PostgresqlConfig
 from server.typem import SecretsConfig
 from server.typem import TcpIpConfig
@@ -38,10 +37,7 @@ def read(config_filename: str):
     postgresql = PostgresqlConfig(**raw_config["postgresql"])
 
     global loggers
-    for lg in raw_config["logger"]:
-        level_str = raw_config["logger"][lg]
-        level = getattr(logging, level_str)
-        loggers[lg] = LoggerConfig(level)
+    loggers = raw_config["logger"]:
 
     global tcp_ip
     tcp_ip = TcpIpConfig(**raw_config["tcp-ip"])

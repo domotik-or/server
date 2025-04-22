@@ -24,11 +24,6 @@ class GeneralConfig:
     dotenv_filename: str
 
 
-@dataclass
-class LoggerConfig:
-    level: int
-
-
 class SecretsConfig:
     pass
 
