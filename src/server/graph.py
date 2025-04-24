@@ -4,6 +4,7 @@ from io import BytesIO
 
 from dateutil import parser as dateparser
 import matplotlib
+import matplotlib.dates as mdates
 import matplotlib.style
 from matplotlib.figure import Figure
 
@@ -16,11 +17,21 @@ def init():
     matplotlib.set_loglevel("info")
 
 
+def set_plot_style(ax):
+    ax.tick_params(axis="x", labelsize=12, which="major")
+    ax.tick_params(labelrotation=30, which="both")
+    ax.xaxis.set_major_locator(mdates.DayLocator())
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%d/%m"))
+    ax.xaxis.set_minor_locator(mdates.HourLocator(byhour=range(3, 24, 3)))
+    ax.xaxis.set_minor_formatter(mdates.DateFormatter("%H:%M"))
+    ax.grid(True, which="both")
+
+
 async def plot_pressure_linky():
     matplotlib.style.use("ggplot")
 
-    fig = Figure(figsize=(10, 8))
-    plt1, plt2 = fig.subplots(2, 1)
+    fig = Figure(figsize=(10, 8), constrained_layout=True)
+    ax1, ax2 = fig.subplots(2, 1)
 
     dts = []
     values = []
@@ -31,9 +42,10 @@ async def plot_pressure_linky():
         dts.append(r["timestamp"])
         values.append(r["pressure"])
 
-    plt1.set_title("Pressure")
-    plt1.set_ylabel("hPa")
-    plt1.plot(dts, values)
+    ax1.set_title("Pressure")
+    ax1.set_ylabel("hPa")
+    set_plot_style(ax1)
+    ax1.plot(dts, values)
 
     dts = []
     values = []
@@ -44,9 +56,10 @@ async def plot_pressure_linky():
         dts.append(r["timestamp"])
         values.append(r["sinst"])
 
-    plt2.set_title("Linky")
-    plt2.set_ylabel("VA")
-    plt2.plot(dts, values)
+    ax2.set_title("Linky")
+    ax2.set_ylabel("VA")
+    set_plot_style(ax2)
+    ax2.plot(dts, values)
 
     buf = BytesIO()
     fig.savefig(buf, format="png")
@@ -56,7 +69,7 @@ async def plot_pressure_linky():
 async def plot_snzb02p(device: str):
     fig = Figure(figsize=(10, 8))
     fig.suptitle(device, fontsize=16)
-    plt1, plt2 = fig.subplots(2, 1, sharex=True)
+    ax1, ax2 = fig.subplots(2, 1, sharex=True)
 
     dts = []
     hmds = []
@@ -71,13 +84,15 @@ async def plot_snzb02p(device: str):
         dts.append(r["timestamp"])
 
 
-    plt1.plot(dts, hmds)
-    plt1.set_title("Humidity")
-    plt1.set_ylabel("%RH")
+    ax1.plot(dts, hmds)
+    ax1.set_title("Humidity")
+    ax1.set_ylabel("%RH")
+    set_plot_style(ax1)
 
-    plt2.plot(dts, tmps)
-    plt2.set_title("Temperature")
-    plt2.set_ylabel("°C")
+    ax2.plot(dts, tmps)
+    ax2.set_title("Temperature")
+    ax2.set_ylabel("°C")
+    set_plot_style(ax2)
 
     buf = BytesIO()
     fig.savefig(buf, format="png")
