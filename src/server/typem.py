@@ -12,6 +12,12 @@ class DeviceConfig:
 
 
 @dataclass
+class GeneralConfig:
+    altitude: float
+    dotenv_filename: str
+
+
+@dataclass
 class PostgresqlConfig:
     hostname: str
     port: int
@@ -20,8 +26,13 @@ class PostgresqlConfig:
 
 
 @dataclass
-class GeneralConfig:
-    dotenv_filename: str
+class GraphConfig:
+    pressure_min: float
+    pressure_max: float
+    indoor_temperature_min: float
+    indoor_temperature_max: float
+    indoor_hygrometry_min: float
+    indoor_hygrometry_max: float
 
 
 class SecretsConfig:

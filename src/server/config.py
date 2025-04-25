@@ -8,12 +8,14 @@ from dotenv import load_dotenv
 
 from server.typem import DeviceConfig
 from server.typem import GeneralConfig
+from server.typem import GraphConfig
 from server.typem import PostgresqlConfig
 from server.typem import SecretsConfig
 from server.typem import TcpIpConfig
 
 device = None
 general = None
+graph = None
 loggers = {}
 postgresql = None
 secrets = None
@@ -32,6 +34,9 @@ def read(config_filename: str):
 
     global general
     general = GeneralConfig(**raw_config["general"])
+
+    global graph
+    graph = GraphConfig(**raw_config["graph"])
 
     global postgresql
     postgresql = PostgresqlConfig(**raw_config["postgresql"])

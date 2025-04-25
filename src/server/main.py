@@ -42,13 +42,13 @@ async def default_handle(request: web.Request):
     buf = await plot_pressure_linky()
     imgs = {
         "pressure_linky": base64.b64encode(buf.getbuffer()).decode("ascii"),
-        "snzb02p": []
+        "snzb02p": {}
     }
 
     # sonoff snzb02p
     for device in config.device.snzb02p:
         buf = await plot_snzb02p(device)
-        imgs["snzb02p"].append(base64.b64encode(buf.getbuffer()).decode("ascii"))
+        imgs["snzb02p"][device] = base64.b64encode(buf.getbuffer()).decode("ascii")
 
     return imgs
 

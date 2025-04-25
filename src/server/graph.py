@@ -8,6 +8,7 @@ import matplotlib.dates as mdates
 import matplotlib.style
 from matplotlib.figure import Figure
 
+import server.config as config
 from server.queries import get_all_linky_records
 from server.queries import get_all_pressure_records
 from server.queries import get_all_sonoff_snzb02p_records
@@ -24,6 +25,10 @@ def set_axis_style(ax):
     ax.xaxis.set_minor_locator(mdates.HourLocator(byhour=range(3, 24, 3)))
     ax.xaxis.set_minor_formatter(mdates.DateFormatter("%H:%M"))
     ax.grid(True, which="both")
+
+
+def _pressure_at_altitude(pressure: float) -> float:
+    return pressure * pow(1.0 - config.general.altitude / 44330.0, 5.255)
 
 
 async def plot_pressure_linky():
@@ -43,6 +48,11 @@ async def plot_pressure_linky():
 
     ax1.set_title("Pressure")
     ax1.set_ylabel("hPa")
+    ax1.set_ylim(
+        auto=False,
+        ymin=_pressure_at_altitude(config.graph.pressure_min),
+        ymax=_pressure_at_altitude(config.graph.pressure_max)
+    )
     set_axis_style(ax1)
     ax1.plot(dts, values)
 
@@ -68,9 +78,8 @@ async def plot_pressure_linky():
 
 
 async def plot_snzb02p(device: str):
-    fig = Figure(figsize=(10, 8))
-    fig.suptitle(device, fontsize=16)
-    ax1, ax2 = fig.subplots(2, 1, sharex=True)
+    fig = Figure(figsize=(10, 8), constrained_layout=True)
+    ax1, ax2 = fig.subplots(2, 1)
 
     dts = []
     hmds = []
@@ -85,15 +94,25 @@ async def plot_snzb02p(device: str):
         dts.append(r["timestamp"])
 
 
-    ax1.plot(dts, hmds)
     ax1.set_title("Humidity")
     ax1.set_ylabel("%RH")
+    ax1.set_ylim(
+        auto=False,
+        ymin=config.graph.indoor_hygrometry_min,
+        ymax=config.graph.indoor_hygrometry_max
+    )
     set_axis_style(ax1)
+    ax1.plot(dts, hmds)
 
-    ax2.plot(dts, tmps)
     ax2.set_title("Temperature")
     ax2.set_ylabel("°C")
     set_axis_style(ax2)
+    ax2.set_ylim(
+        auto=False,
+        ymin=config.graph.indoor_temperature_min,
+        ymax=config.graph.indoor_temperature_max
+    )
+    ax2.plot(dts, tmps)
 
     fig.autofmt_xdate(rotation=30, ha="right", which="both")
 

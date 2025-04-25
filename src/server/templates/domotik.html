@@ -2,13 +2,24 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>My home automation</title>
+<title>My home automation system</title>
+<style>
+  h2 {
+    width: 100%;
+    text-align:center;
+  }
+  img {
+    display: block;
+    margin: auto;
+  }
+</style>
 </head>
 
 <body>
     <div><img src="data:image/png;base64,{{ pressure_linky }}"/></div>
 
-    {% for img in snzb02p %}
+    {% for dev, img in snzb02p.items() %}
+    <h2 style="text-align: center;">{{ dev }}</h2>
     <div><img src="data:image/png;base64,{{ img }}"/></div>
     {% endfor %}
 
