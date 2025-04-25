@@ -17,9 +17,8 @@ def init():
     matplotlib.set_loglevel("info")
 
 
-def set_plot_style(ax):
+def set_axis_style(ax):
     ax.tick_params(axis="x", labelsize=12, which="major")
-    ax.tick_params(labelrotation=30, which="both")
     ax.xaxis.set_major_locator(mdates.DayLocator())
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%d/%m"))
     ax.xaxis.set_minor_locator(mdates.HourLocator(byhour=range(3, 24, 3)))
@@ -44,7 +43,7 @@ async def plot_pressure_linky():
 
     ax1.set_title("Pressure")
     ax1.set_ylabel("hPa")
-    set_plot_style(ax1)
+    set_axis_style(ax1)
     ax1.plot(dts, values)
 
     dts = []
@@ -58,8 +57,10 @@ async def plot_pressure_linky():
 
     ax2.set_title("Linky")
     ax2.set_ylabel("VA")
-    set_plot_style(ax2)
+    set_axis_style(ax2)
     ax2.plot(dts, values)
+
+    fig.autofmt_xdate(rotation=30, ha="right", which="both")
 
     buf = BytesIO()
     fig.savefig(buf, format="png")
@@ -87,12 +88,14 @@ async def plot_snzb02p(device: str):
     ax1.plot(dts, hmds)
     ax1.set_title("Humidity")
     ax1.set_ylabel("%RH")
-    set_plot_style(ax1)
+    set_axis_style(ax1)
 
     ax2.plot(dts, tmps)
     ax2.set_title("Temperature")
     ax2.set_ylabel("°C")
-    set_plot_style(ax2)
+    set_axis_style(ax2)
+
+    fig.autofmt_xdate(rotation=30, ha="right", which="both")
 
     buf = BytesIO()
     fig.savefig(buf, format="png")
