@@ -80,6 +80,7 @@ async def plot_pressure(days: int = 3):
         ymax=_pressure_at_altitude(config.graph.pressure_max)
     )
     set_axis_style(ax)
+    ax.axhline(y=_pressure_at_altitude(1013.25), color='w', linestyle=':')
     ax.plot(dts, values, color="limegreen", linewidth=2)
 
     fig.autofmt_xdate(rotation=60, ha="right", which="both")
