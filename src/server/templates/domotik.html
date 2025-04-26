@@ -4,7 +4,17 @@
 <meta charset="UTF-8">
 <title>My home automation system</title>
 <style>
-  h2 {
+body {
+    background: gray;
+}
+  div.box {
+    background: darkslategray;
+    color: white;
+    margin: auto;
+    padding: 10px;
+    width: 20%;
+  }
+  h1, h2 {
     width: 100%;
     text-align:center;
   }
@@ -13,16 +23,27 @@
     margin: auto;
   }
 </style>
+<meta http-equiv="refresh" content="300">
 </head>
 
 <body>
-    <div><img src="data:image/png;base64,{{ pressure_linky }}"/></div>
+    <h1>{{ datetime.strftime("%Y/%m/%d %H:%M") }}</h1>
 
-    {% for dev, img in snzb02p.items() %}
+    {% for dev, img in images.items() %}
     <h2 style="text-align: center;">{{ dev }}</h2>
     <div><img src="data:image/png;base64,{{ img }}"/></div>
     {% endfor %}
 
+    <h2 style="text-align: center;">Events</h2>
+
+    {% for dev, evts in events.items() %}
+    <h2 style="text-align: center;">{{ dev }}</h2>
+    <div class="box">
+        {% for evt in evts %}
+        {{ evt["timestamp"].strftime("%Y/%m/%d %H:%M") }}<br>
+        {% endfor %}
+    </div>
+    {% endfor %}
 </body>
 
 </html>

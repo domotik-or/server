@@ -42,26 +42,26 @@ async def get_linky_records(
         yield [dict(e) for e in sss]
 
 
-_onoff_query = (
+_on_off_query = (
     "SELECT * FROM on_off "
-    "WHERE timestamp >= $1 AND timestamp <= $2 "
+    "WHERE device=$1 AND timestamp >= $2 AND timestamp <= $3 "
     "ORDER BY timestamp;"
 )
 
 
-async def get_all_onoff_records(
-    start_date: datetime, end_date: datetime
+async def get_all_on_off_records(
+    device: str, start_date: datetime, end_date: datetime
 ):
     """Get the on_off data from the on_off table"""
-    return await get_rows(_onoff_query, start_date, end_date)
+    return await get_rows(_on_off_query, device, start_date, end_date)
 
 
-async def get_onoff_records(
-    start_date: datetime, end_date: datetime
+async def get_on_off_records(
+    device: str, start_date: datetime, end_date: datetime
 ) -> AsyncGenerator[list[dict], None]:
     """Get the on_off data from the on_off table"""
-    async for oos in get_many_rows(_onoff_query, start_date, end_date):
-        yield [dict(e) for e in oos]
+    async for sss in get_many_rows(_snzb02p_query, device, start_date, end_date):
+        yield [dict(e) for e in sss]
 
 
 _pressure_query = (

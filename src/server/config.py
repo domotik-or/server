@@ -6,14 +6,13 @@ import tomllib
 
 from dotenv import load_dotenv
 
-from server.typem import DeviceConfig
 from server.typem import GeneralConfig
 from server.typem import GraphConfig
 from server.typem import PostgresqlConfig
 from server.typem import SecretsConfig
 from server.typem import TcpIpConfig
 
-device = None
+devices = None
 general = None
 graph = None
 loggers = {}
@@ -27,10 +26,8 @@ def read(config_filename: str):
     with open(config_file, "rb") as f:
         raw_config = tomllib.load(f)
 
-    global device
-    device = DeviceConfig()
-    for k, v in raw_config["device"].items():
-        setattr(device, k, v)
+    global devices
+    devices = raw_config["devices"]
 
     global general
     general = GeneralConfig(**raw_config["general"])

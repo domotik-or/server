@@ -18,8 +18,9 @@ port = 5432
 username = "domotik"
 databasename = "domotiq"
 
-[device]
+[devices]
 snzb02p = ["sejour", "chambre_haut"]
+events = ["doorbell"]
 
 [graph]
 pressure_min = 985

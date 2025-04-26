@@ -1,7 +1,6 @@
-#!/usr/bin/env python3
-
 import base64
 from datetime import datetime
+from datetime import timedelta
 import importlib
 import logging
 from logging import StreamHandler
@@ -17,12 +16,14 @@ import jinja2
 
 import server.config as config
 from server.graph import init as init_graph
-from server.graph import plot_pressure_linky
+from server.graph import plot_linky
+from server.graph import plot_pressure
 from server.graph import plot_snzb02p
 from server.queries import close as close_db
 from server.queries import init as init_db
 from server.queries import get_linky_records
-from server.queries import get_onoff_records
+from server.queries import get_all_on_off_records
+from server.queries import get_on_off_records
 from server.queries import get_pressure_records
 from server.queries import get_sonoff_snzb02p_records
 
@@ -38,19 +39,34 @@ logger.setLevel(logging.DEBUG)
 
 @aiohttp_jinja2.template("domotik.html")
 async def default_handle(request: web.Request):
-    # pressure and linky
-    buf = await plot_pressure_linky()
-    imgs = {
-        "pressure_linky": base64.b64encode(buf.getbuffer()).decode("ascii"),
-        "snzb02p": {}
+    tmpl_context = {
+        "datetime": datetime.now(),
+        "events": {},
+        "images": {}
     }
 
-    # sonoff snzb02p
-    for device in config.device.snzb02p:
-        buf = await plot_snzb02p(device)
-        imgs["snzb02p"][device] = base64.b64encode(buf.getbuffer()).decode("ascii")
+    # images
 
-    return imgs
+    # pressure and linky
+    buf_linky = await plot_linky()
+    tmpl_context["images"]["linky"] = base64.b64encode(buf_linky.getbuffer()).decode("ascii")
+    buf_pressure = await plot_pressure()
+    tmpl_context["images"]["pressure"] = base64.b64encode(buf_pressure.getbuffer()).decode("ascii")
+
+    # sonoff snzb02p
+    for device in config.devices["snzb02p"]:
+        buf = await plot_snzb02p(device)
+        tmpl_context["images"][device] = base64.b64encode(buf.getbuffer()).decode("ascii")
+
+    # events
+
+    start_datetime = datetime.now() - timedelta(weeks=4)
+    for events in config.devices["events"]:
+        tmpl_context["events"][events] = await get_all_on_off_records(
+            events, start_datetime, datetime.now()
+        )
+
+    return tmpl_context
 
 
 def get_common_parameters(request: web.Request) -> tuple[datetime, datetime]:
@@ -121,7 +137,7 @@ async def onoff_handle(request: web.Request) -> web.StreamResponse:
     # send csv header
     await response.write("timestamp, device, state\n".encode())
 
-    async for oos in get_onoff_records(start_date, end_date):
+    async for oos in get_on_off_records(start_date, end_date):
         if len(oos) == 0:
             break
 
