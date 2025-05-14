@@ -7,7 +7,7 @@ https://github.com/mesonbuild/meson/issues/14313#issuecomment-2814392556
 
     pip install matplotlib
     --config-settings=setup-args=--cross-file=/home/domotik/server/src/meson_cross_file
-    --break-system-packageso
+    --break-system-packages
 
 Packages to install
 ===================
@@ -85,84 +85,20 @@ If necessary, use a virtual Python environment:
 
 .. code-block:: console
 
-    pip install -r requirements.txt
+    pip install .
 
 Launch the server: ::
 
 .. code-block:: console
 
-    $ gunicorn domotik.main:app --bind 127.0.0.1:8080 --workers 3 --worker-class aiohttp.GunicornWebWorker
+    $ gunicorn server.main:app --bind 127.0.0.1:8080 --workers 3 --worker-class aiohttp.GunicornWebWorker
 
 Testing the server
 ==================
 
-Getting the zone
-----------------
-
 .. code-block:: console
 
-    wget -O - "localhost:8080/get_zone?longitude=0.8955510136151068&latitude=45.98346591051388"
-
-Deleting battery event records
-------------------------------
-
-.. code-block:: console
-
-    wget -O - --method=DELETE "localhost:8080/battery?zone_id=1&start_date=1743152400&end_date=1743580800"
-
-Deleting navigation records
----------------------------
-
-.. code-block:: console
-
-    wget -O - --method=DELETE "localhost:8080/navigation?zone_id=1&start_date=1743152400&end_date=1743580800"
-
-Deleting water quality records
-------------------------------
-
-.. code-block:: console
-
-    wget -O - --method=DELETE "localhost:8080/water_quality?zone_id=1&start_date=1743152400&end_date=1743580800"
-
-Getting battery event records
------------------------------
-
-.. code-block:: console
-
-    wget -O - "localhost:8080/battery?zone_id=1&start_date=1743152400&end_date=1743580800"
-
-Getting navigation records
---------------------------
-
-.. code-block:: console
-
-    wget -O - "localhost:8080/navigation?zone_id=1&start_date=1743152400&end_date=1743580800"
-
-Getting water quality records
------------------------------
-
-.. code-block:: console
-
-    wget -O - "localhost:8080/navigation?zone_id=1&start_date=1743152400&end_date=1743580800"
-
-Sending battery event
----------------------
-
-.. code-block:: console
-
-    wget -q - localhost:8080/battery --post-data='{"zone_id": 1, "datetime": 1742893217, "event": 1}'
-
-Sending navigation informations
--------------------------------
-
-.. code-block:: console
-
-    wget -q - localhost:8080/navigation --post-data='{"zone_id": 1, "datetime": 1742893217, "latitude": 45.98346591051388, "longitude": 0.8955510136151068, "depth": 1.1}'
-
-Sending navigation informations
--------------------------------
-
-.. code-block:: console
-
-    wget -q - localhost:8080/water_quality --post-data='{"zone_id": 1, "datetime": 1742893217, "longitude": 0.8955510136151068, "latitude": 45.98346591051388, "barometric_pressure": 1013.25,"temperature": 21, "ph": 7, "oxydation_reduction_potential": 0.1, "electrical_conductivity": 0.2, "electrical_conductivity_20": 0.3, "electrical_conductivity_25": 0.4, "electrical_resistivity": 0.5, "salinity": 0.6, "total_dissolved_solids": 0.8, "specific_seawater_gravity": 0.9, "dissolved_oxygen": 1.1, "dissolved_oxygen_airsat": 1.2}'
-
+    wget -O - "localhost:8080/linky?start=1747224137,end=1747224159"
+    wget -O - "localhost:8080/onoff?start=1747224137,end=1747224159"
+    wget -O - "localhost:8080/pressure?start=1747224137,end=1747224159"
+    wget -O - "localhost:8080/snzb02p?start=1747224137,end=1747224159"
