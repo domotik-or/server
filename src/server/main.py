@@ -27,8 +27,6 @@ from server.queries import get_on_off_records
 from server.queries import get_pressure_records
 from server.queries import get_sonoff_snzb02p_records
 
-__version__ = "1.0.0"
-
 logger = logging.getLogger()
 stream_handler = StreamHandler(stream=sys.stdout)
 formatter = logging.Formatter("%(asctime)s %(name)s %(levelname)s %(message)s")
