@@ -15,7 +15,6 @@ from server.queries import get_all_pressure_records
 from server.queries import get_all_sonoff_snzb02p_records
 
 
-
 def init():
     matplotlib.set_loglevel("info")
     mpl_style(dark=True)
@@ -105,7 +104,6 @@ async def plot_snzb02p(device: str, days: int = 2):
         hmds.append(r["humidity"])
         tmps.append(r["temperature"])
         dts.append(r["timestamp"])
-
 
     ax1.set_title("Humidity")
     ax1.set_ylabel("%RH")
