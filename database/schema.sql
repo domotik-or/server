@@ -4,6 +4,11 @@ CREATE TABLE linky (
     timestamp TIMESTAMP(1) WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE linky_archive (
+    east INTEGER,
+    timestamp TIMESTAMP(1) WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE on_off (
     device VARCHAR(30),
     state boolean,
