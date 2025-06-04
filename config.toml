@@ -1,6 +1,9 @@
 [general]
 altitude = 326.0
-dotenv_filename = "/home/domotik/.config/domotik/server.env"
+
+[secret]
+env_path = "/home/domotik/.config/domotik/server.env"
+env_names = ["PGPASSWORD"]
 
 [tcp-ip]
 port = 8085

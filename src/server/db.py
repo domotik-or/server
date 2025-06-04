@@ -18,7 +18,7 @@ async def attach_db():
 
     if _db_pool is None:
         dsn = (
-            f"postgres://{config.postgresql.username}:{config.secrets.pgpassword}"
+            f"postgres://{config.postgresql.username}:{config.secret.pgpassword}"
             f"@{config.postgresql.hostname}:{config.postgresql.port}/"
             f"{config.postgresql.databasename}"
         )

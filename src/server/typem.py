@@ -10,7 +10,6 @@ class BatteryEvent(IntEnum):
 @dataclass
 class GeneralConfig:
     altitude: float
-    dotenv_filename: str
 
 
 @dataclass
@@ -31,7 +30,7 @@ class GraphConfig:
     indoor_hygrometry_max: float
 
 
-class SecretsConfig:
+class SecretConfig:
     pass
 
 
