@@ -14,7 +14,7 @@ dependencies = [
     "python-dotenv==1.1.0",
     "qbstyles==0.1.4"
 ]
-license = "GPL-3.0-or-later"
+# license = "GPL-3.0-or-later"
 keywords = ["home automation", "server"]
 
 [project.urls]
