@@ -1,4 +1,3 @@
-import logging
 from os import getenv
 from pathlib import Path
 import sys
@@ -6,19 +5,17 @@ import tomllib
 
 from dotenv import load_dotenv
 
+from server.typem import DatabaseConfig
 from server.typem import GeneralConfig
 from server.typem import GraphConfig
-from server.typem import PostgresqlConfig
 from server.typem import SecretConfig
-from server.typem import TcpIpConfig
 
+database = None
 devices = None
 general = None
 graph = None
 loggers = {}
-postgresql = None
 secret = None
-tcp_ip = None
 
 
 def read(config_filename: str):
@@ -35,14 +32,11 @@ def read(config_filename: str):
     global graph
     graph = GraphConfig(**raw_config["graph"])
 
-    global postgresql
-    postgresql = PostgresqlConfig(**raw_config["postgresql"])
+    global database
+    database = DatabaseConfig(**raw_config["database"])
 
     global loggers
     loggers = raw_config["logger"]
-
-    global tcp_ip
-    tcp_ip = TcpIpConfig(**raw_config["tcp-ip"])
 
     # store secrets data in config class
     global secret

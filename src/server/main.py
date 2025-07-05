@@ -15,12 +15,12 @@ import aiohttp_cors
 import jinja2
 
 import server.config as config
+from server.db import close as close_db
+from server.db import init as init_db
 from server.graph import init as init_graph
 from server.graph import plot_linky
 from server.graph import plot_pressure
 from server.graph import plot_snzb02p
-from server.queries import close as close_db
-from server.queries import init as init_db
 from server.queries import get_linky_records
 from server.queries import get_all_on_off_records
 from server.queries import get_on_off_records

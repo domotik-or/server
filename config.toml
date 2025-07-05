@@ -1,12 +1,13 @@
 [general]
 altitude = 326.0
+port = 8085
+
+[database]
+path = "/home/domotik/domotik.db"
 
 [secret]
 env_path = "/home/domotik/.config/domotik/server.env"
-env_names = ["PGPASSWORD"]
-
-[tcp-ip]
-port = 8085
+env_names = [""]
 
 [logger]
 aiohttp = "WARNING"
@@ -14,12 +15,6 @@ aiohttp = "WARNING"
 [logger.server]
 db = "INFO"
 queries = "INFO"
-
-[postgresql]
-hostname = "localhost"
-port = 5432
-username = "domotik"
-databasename = "domotiq"
 
 [devices]
 snzb02p = ["sejour", "chambre_haut"]

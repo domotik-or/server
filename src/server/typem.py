@@ -1,23 +1,15 @@
 from dataclasses import dataclass
-from enum import IntEnum
 
 
-class BatteryEvent(IntEnum):
-    CHARGE_20 = 0
-    CHARGE_50 = 1
+@dataclass
+class DatabaseConfig:
+    path: str
 
 
 @dataclass
 class GeneralConfig:
     altitude: float
-
-
-@dataclass
-class PostgresqlConfig:
-    hostname: str
     port: int
-    username: str
-    databasename: str
 
 
 @dataclass
@@ -32,8 +24,3 @@ class GraphConfig:
 
 class SecretConfig:
     pass
-
-
-@dataclass
-class TcpIpConfig:
-    port: int
