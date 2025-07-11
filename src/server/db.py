@@ -154,6 +154,8 @@ async def get_sonoff_snzb02p_records(
 
 
 async def run(config_filename: str):
+    import pytz
+
     config.read(config_filename)
 
     await init()
@@ -164,10 +166,6 @@ async def run(config_filename: str):
         # )
         #
         # await execute_query(
-        #     "INSERT INTO linky(east, sinst) VALUES (?, ?)", 1000, 2000
-        # )
-        #
-        # await execute_query(
         #     "INSERT INTO pressure(pressure) VALUES (?)", 1013.25
         # )
         #
@@ -175,13 +173,14 @@ async def run(config_filename: str):
         #     "INSERT INTO sonoff_snzb02p(device, humidity, temperature) VALUES (?, ?, ?)",
         #     "sejour", 50.0, 21.0
         # )
+        await execute_query("DELETE FROM linky")
+        await execute_query(
+            "INSERT INTO linky(east, sinst) VALUES (?, ?)", 1000, 2000
+        )
+        timestamp = datetime.now(pytz.utc)
 
-        rows = await get_all_linky_records(datetime.now() - timedelta(days=5), datetime.now())
+        rows = await get_all_linky_records(timestamp - timedelta(hours=1), timestamp)
         print(rows)
-
-        async for row in get_linky_records(datetime.now() - timedelta(days=5), datetime.now()):
-            print(row)
-
     finally:
         await close()
 

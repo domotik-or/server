@@ -7,6 +7,7 @@ import matplotlib
 import matplotlib.dates as mdates
 import matplotlib.style
 from matplotlib.figure import Figure
+import pytz
 from qbstyles import mpl_style
 
 import server.config as config
@@ -40,8 +41,8 @@ async def plot_linky(days: int = 2):
     dts = []
     values = []
 
-    start_datetime = datetime.now() - timedelta(days=days)
-    records = await get_all_linky_records(start_datetime, datetime.now())
+    start_datetime = datetime.now(pytz.utc) - timedelta(days=days)
+    records = await get_all_linky_records(start_datetime, datetime.now(pytz.utc))
     for r in records:
         dts.append(r["timestamp"])
         values.append(r["sinst"])
@@ -65,8 +66,8 @@ async def plot_pressure(days: int = 3):
     dts = []
     values = []
 
-    start_datetime = datetime.now() - timedelta(days=days)
-    records = await get_all_pressure_records(start_datetime, datetime.now())
+    start_datetime = datetime.now(pytz.utc) - timedelta(days=days)
+    records = await get_all_pressure_records(start_datetime, datetime.now(pytz.utc))
     for r in records:
         dts.append(r["timestamp"])
         values.append(r["pressure"])
@@ -96,9 +97,9 @@ async def plot_snzb02p(device: str, days: int = 2):
     dts = []
     hmds = []
     tmps = []
-    start_datetime = datetime.now() - timedelta(days=days)
+    start_datetime = datetime.now(pytz.utc) - timedelta(days=days)
     records = await get_all_sonoff_snzb02p_records(
-        device, start_datetime, datetime.now()
+        device, start_datetime, datetime.now(pytz.utc)
     )
     for r in records:
         hmds.append(r["humidity"])

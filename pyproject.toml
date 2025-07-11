@@ -12,6 +12,7 @@ dependencies = [
     "aiosqlite==0.21.0",
     "matplotlib==3.10.1",
     "python-dotenv==1.1.0",
+    "pytz==2025.2",
     "qbstyles==0.1.4"
 ]
 # license = "GPL-3.0-or-later"
