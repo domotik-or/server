@@ -1,3 +1,5 @@
+import argparse
+import asyncio
 import base64
 from datetime import datetime
 from datetime import timedelta
@@ -239,19 +241,11 @@ def _set_loggers_level(config_loggers: dict, module_path: list):
 async def init():
     _set_loggers_level(config.loggers, [])
 
-
-async def startup(app):
     init_graph()
     await init_db()
 
-    # setup_security(
-    #     app,
-    #     SessionIdentityPolicy(),
-    #     DBAuthorizationPolicy(db_pool)
-    # )
 
-
-async def cleanup(app):
+async def close():
     await close_db()
 
 
@@ -277,6 +271,12 @@ def make_app():
     for route in list(app.router.routes()):
         cors.add(route)
 
+    # setup_security(
+    #     app,
+    #     SessionIdentityPolicy(),
+    #     DBAuthorizationPolicy(db_pool)
+    # )
+
     # configure jinja2
     path = Path(__file__).parents[0]
     template_dir = Path(path, "templates")
@@ -285,13 +285,28 @@ def make_app():
         loader=jinja2.FileSystemLoader(template_dir)
     )
 
-    app.on_startup.append(startup)
-    app.on_cleanup.append(cleanup)
-
     return app
 
 
+async def run(config_filename: str):
+    config.read(config_filename)
+
+    await init()
+
+    app = make_app()
+
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, "0.0.0.0", config.general.port)
+    logger.info("web server is running")
+    await site.start()
+
+    while True:
+        await asyncio.sleep(1)
+
+
 def sigterm_handler(_signo, _stack_frame):
+    # raises SystemExit(0):
     sys.exit(0)
 
 
@@ -302,8 +317,18 @@ app = make_app()
 def main():
     signal.signal(signal.SIGTERM, sigterm_handler)
 
-    web.run_app(
-        app,
-        host="0.0.0.0",
-        port=config.general.port
-    )
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-c", "--config", default="config.toml")
+    args = parser.parse_args()
+
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    try:
+        logger.info("server started")
+        loop.run_until_complete(run(args.config))
+    except KeyboardInterrupt:
+        pass
+    finally:
+        loop.run_until_complete(close())
+        loop.stop()
+        logger.info("server stopped")
