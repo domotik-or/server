@@ -101,4 +101,4 @@ Testing the server
     wget -O - "localhost:8080/linky?start=1747224137,end=1747224159"
     wget -O - "localhost:8080/onoff?start=1747224137,end=1747224159"
     wget -O - "localhost:8080/pressure?start=1747224137,end=1747224159"
-    wget -O - "localhost:8080/snzb02p?start=1747224137,end=1747224159"
+    wget -O - "localhost:8080/temperature_humidity?start=1747224137,end=1747224159"

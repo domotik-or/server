@@ -105,7 +105,7 @@ async def get_on_off_records(
     device: str, start_date: datetime, end_date: datetime
 ) -> AsyncGenerator[list[dict], None]:
     """Get the on_off data from the on_off table"""
-    async for sss in get_many_rows(_snzb02p_query, device, start_date, end_date):
+    async for sss in get_many_rows(_temperature_humidity_query, device, start_date, end_date):
         yield sss
 
 
@@ -131,25 +131,25 @@ async def get_pressure_records(
         yield sss
 
 
-_snzb02p_query = (
-    "SELECT timestamp, humidity, temperature FROM sonoff_snzb02p "
-    "WHERE device=$1 AND timestamp >= ? AND timestamp <= ? "
+_temperature_humidity_query = (
+    "SELECT humidity, temperature, timestamp FROM temperature_humidity "
+    "WHERE device=? AND timestamp >= ? AND timestamp <= ? "
     "ORDER BY timestamp;"
 )
 
 
-async def get_all_sonoff_snzb02p_records(
+async def get_all_temperature_humidity_records(
     device: str, start_date: datetime, end_date: datetime
 ):
-    """Get the snzb02p data from the sonoff_snzb02p table"""
-    return await get_rows(_snzb02p_query, device, start_date, end_date)
+    """Get the data from the temperature_humidity table"""
+    return await get_rows(_temperature_humidity_query, device, start_date, end_date)
 
 
-async def get_sonoff_snzb02p_records(
+async def get_temperature_humidity_records(
     device: str, start_date: datetime, end_date: datetime
 ) -> AsyncGenerator[list[dict], None]:
-    """Get the snzb02p data from the sonoff_snzb02p table"""
-    async for sss in get_many_rows(_snzb02p_query, device, start_date, end_date):
+    """Get the data from the temperature_humidity table"""
+    async for sss in get_many_rows(_temperature_humidity_query, device, start_date, end_date):
         yield sss
 
 
@@ -170,7 +170,7 @@ async def run(config_filename: str):
         # )
         #
         # await execute_query(
-        #     "INSERT INTO sonoff_snzb02p(device, humidity, temperature) VALUES (?, ?, ?)",
+        #     "INSERT INTO temperature_humidity(device, humidity, temperature) VALUES (?, ?, ?)",
         #     "sejour", 50.0, 21.0
         # )
         await execute_query("DELETE FROM linky")

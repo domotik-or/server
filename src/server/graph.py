@@ -11,9 +11,9 @@ import pytz
 from qbstyles import mpl_style
 
 import server.config as config
-from server.queries import get_all_linky_records
-from server.queries import get_all_pressure_records
-from server.queries import get_all_sonoff_snzb02p_records
+from server.db import get_all_linky_records
+from server.db import get_all_pressure_records
+from server.db import get_all_temperature_humidity_records
 
 
 def init():
@@ -44,8 +44,8 @@ async def plot_linky(days: int = 2):
     start_datetime = datetime.now(pytz.utc) - timedelta(days=days)
     records = await get_all_linky_records(start_datetime, datetime.now(pytz.utc))
     for r in records:
-        dts.append(r["timestamp"])
-        values.append(r["sinst"])
+        values.append(r[1])  # sinst
+        dts.append(datetime.strptime(r[2], "%Y-%m-%d %H:%M:%S"))  # timestamp
 
     # ax.set_title("Linky")
     ax.set_ylabel("VA")
@@ -69,8 +69,8 @@ async def plot_pressure(days: int = 3):
     start_datetime = datetime.now(pytz.utc) - timedelta(days=days)
     records = await get_all_pressure_records(start_datetime, datetime.now(pytz.utc))
     for r in records:
-        dts.append(r["timestamp"])
-        values.append(r["pressure"])
+        values.append(r[0])  # pressure
+        dts.append(datetime.strptime(r[1], "%Y-%m-%d %H:%M:%S"))  # timestamp
 
     # ax.set_title("Pressure")
     ax.set_ylabel("hPa")
@@ -90,7 +90,7 @@ async def plot_pressure(days: int = 3):
     return buf
 
 
-async def plot_snzb02p(device: str, days: int = 2):
+async def plot_temperature_humidity(device: str, days: int = 2):
     fig = Figure(figsize=(10, 8), constrained_layout=True)
     ax1, ax2 = fig.subplots(2, 1)
 
@@ -98,13 +98,13 @@ async def plot_snzb02p(device: str, days: int = 2):
     hmds = []
     tmps = []
     start_datetime = datetime.now(pytz.utc) - timedelta(days=days)
-    records = await get_all_sonoff_snzb02p_records(
+    records = await get_all_temperature_humidity_records(
         device, start_datetime, datetime.now(pytz.utc)
     )
     for r in records:
-        hmds.append(r["humidity"])
-        tmps.append(r["temperature"])
-        dts.append(r["timestamp"])
+        hmds.append(r[0])  # humidity
+        tmps.append(r[1])  # temperature
+        dts.append(datetime.strptime(r[2], "%Y-%m-%d %H:%M:%S"))  # timestamp
 
     ax1.set_title("Humidity")
     ax1.set_ylabel("%RH")

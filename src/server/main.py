@@ -20,12 +20,12 @@ from server.db import init as init_db
 from server.graph import init as init_graph
 from server.graph import plot_linky
 from server.graph import plot_pressure
-from server.graph import plot_snzb02p
-from server.queries import get_linky_records
-from server.queries import get_all_on_off_records
-from server.queries import get_on_off_records
-from server.queries import get_pressure_records
-from server.queries import get_sonoff_snzb02p_records
+from server.graph import plot_temperature_humidity
+from server.db import get_linky_records
+from server.db import get_all_on_off_records
+from server.db import get_on_off_records
+from server.db import get_pressure_records
+from server.db import get_temperature_humidity_records
 
 logger = logging.getLogger()
 stream_handler = StreamHandler(stream=sys.stdout)
@@ -51,9 +51,9 @@ async def default_handle(request: web.Request):
     buf_pressure = await plot_pressure()
     tmpl_context["images"]["pressure"] = base64.b64encode(buf_pressure.getbuffer()).decode("ascii")
 
-    # sonoff snzb02p
-    for device in config.devices["snzb02p"]:
-        buf = await plot_snzb02p(device)
+    # temperture and humidity
+    for device in config.devices["temperature_humidity"]:
+        buf = await plot_temperature_humidity(device)
         tmpl_context["images"][device] = base64.b64encode(buf.getbuffer()).decode("ascii")
 
     # events
@@ -180,14 +180,14 @@ async def pressure_handle(request: web.Request) -> web.StreamResponse:
     return response
 
 
-async def sonoff_snzb02p_handle(request: web.Request) -> web.StreamResponse:
+async def temperature_humidity_handle(request: web.Request) -> web.StreamResponse:
     start_date, end_date = get_common_parameters(request)
     try:
         device = request.rel_url.query["device"]
     except KeyError:
         raise web.HTTPBadRequest(reason="device: missing parameter")
 
-    filename = f"snzb02p-{datetime.now().strftime('%Y%m%d%H%M%S')}.csv"
+    filename = f"temperature_humidity-{datetime.now().strftime('%Y%m%d%H%M%S')}.csv"
     response = web.StreamResponse(
         status=200,
         reason="OK",
@@ -201,7 +201,7 @@ async def sonoff_snzb02p_handle(request: web.Request) -> web.StreamResponse:
     # send csv header
     await response.write("timestamp, device, humidity, temperature\n".encode())
 
-    async for sss in get_sonoff_snzb02p_records(device, start_date, end_date):
+    async for sss in get_temperature_humidity_records(device, start_date, end_date):
         if len(sss) == 0:
             break
 
@@ -255,7 +255,7 @@ async def cleanup(app):
     await close_db()
 
 
-async def make_app():
+def make_app():
     # run a server
     app = web.Application()
 
@@ -263,7 +263,7 @@ async def make_app():
     app.router.add_get("/linky", linky_handle)
     app.router.add_get("/onoff", onoff_handle)
     app.router.add_get("/pressure", pressure_handle)
-    app.router.add_get("/snzb02p", sonoff_snzb02p_handle)
+    app.router.add_get("/temperature_humidity", temperature_humidity_handle)
 
     cors = aiohttp_cors.setup(app, defaults={
         "*": aiohttp_cors.ResourceOptions(
@@ -305,5 +305,5 @@ def main():
     web.run_app(
         app,
         host="0.0.0.0",
-        port=config.tcp_ip.port
+        port=config.general.port
     )
