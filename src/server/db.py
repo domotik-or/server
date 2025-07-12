@@ -74,16 +74,20 @@ _linky_query = (
 
 async def get_all_linky_records(
     start_date: datetime, end_date: datetime
-):
+) -> Optional[list[Row]]:
     """Get the linky data from the linky table"""
-    return await get_rows(_linky_query, start_date, end_date)
+    return await get_rows(
+        _linky_query, int(start_date.timestamp()), int(end_date.timestamp())
+    )
 
 
 async def get_linky_records(
     start_date: datetime, end_date: datetime
 ) -> AsyncGenerator[list[dict], None]:
     """Get the linky data from the linky table"""
-    async for sss in get_many_rows(_linky_query, start_date, end_date):
+    async for sss in get_many_rows(
+        _linky_query, int(start_date.timestamp()), int(end_date.timestamp())
+    ):
         yield sss
 
 
@@ -96,16 +100,20 @@ _on_off_query = (
 
 async def get_all_on_off_records(
     device: str, start_date: datetime, end_date: datetime
-):
+) -> Optional[list[Row]]:
     """Get the on_off data from the on_off table"""
-    return await get_rows(_on_off_query, device, start_date, end_date)
+    return await get_rows(
+        _on_off_query, int(start_date.timestamp()), int(end_date.timestamp())
+    )
 
 
 async def get_on_off_records(
     device: str, start_date: datetime, end_date: datetime
 ) -> AsyncGenerator[list[dict], None]:
     """Get the on_off data from the on_off table"""
-    async for sss in get_many_rows(_temperature_humidity_query, device, start_date, end_date):
+    async for sss in get_many_rows(
+        _on_off_query, int(start_date.timestamp()), int(end_date.timestamp())
+    ):
         yield sss
 
 
@@ -118,16 +126,20 @@ _pressure_query = (
 
 async def get_all_pressure_records(
     start_date: datetime, end_date: datetime
-):
+) -> Optional[list[Row]]:
     """Get the pressure data from the pressure table"""
-    return await get_rows(_pressure_query, start_date, end_date)
+    return await get_rows(
+        _pressure_query, int(start_date.timestamp()), int(end_date.timestamp())
+    )
 
 
 async def get_pressure_records(
     start_date: datetime, end_date: datetime
 ) -> AsyncGenerator[list[dict], None]:
     """Get the pressure data from the pressure table"""
-    async for prs in get_many_rows(_pressure_query, start_date, end_date):
+    async for prs in get_many_rows(
+        _pressure_query, int(start_date.timestamp()), int(end_date.timestamp())
+    ):
         yield sss
 
 
@@ -140,16 +152,22 @@ _temperature_humidity_query = (
 
 async def get_all_temperature_humidity_records(
     device: str, start_date: datetime, end_date: datetime
-):
+) -> Optional[list[Row]]:
     """Get the data from the temperature_humidity table"""
-    return await get_rows(_temperature_humidity_query, device, start_date, end_date)
+    return await get_rows(
+        _temperature_humidity_query,
+        int(start_date.timestamp()), int(end_date.timestamp())
+    )
 
 
 async def get_temperature_humidity_records(
     device: str, start_date: datetime, end_date: datetime
 ) -> AsyncGenerator[list[dict], None]:
     """Get the data from the temperature_humidity table"""
-    async for sss in get_many_rows(_temperature_humidity_query, device, start_date, end_date):
+    async for sss in get_many_rows(
+        _temperature_humidity_query,
+        int(start_date.timestamp()), int(end_date.timestamp())
+    ):
         yield sss
 
 
