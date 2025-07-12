@@ -103,7 +103,8 @@ async def get_all_on_off_records(
 ) -> Optional[list[Row]]:
     """Get the on_off data from the on_off table"""
     return await get_rows(
-        _on_off_query, int(start_date.timestamp()), int(end_date.timestamp())
+        _on_off_query, device,
+        int(start_date.timestamp()), int(end_date.timestamp())
     )
 
 
@@ -112,7 +113,8 @@ async def get_on_off_records(
 ) -> AsyncGenerator[list[dict], None]:
     """Get the on_off data from the on_off table"""
     async for sss in get_many_rows(
-        _on_off_query, int(start_date.timestamp()), int(end_date.timestamp())
+        _on_off_query, device,
+        int(start_date.timestamp()), int(end_date.timestamp())
     ):
         yield sss
 
@@ -155,7 +157,7 @@ async def get_all_temperature_humidity_records(
 ) -> Optional[list[Row]]:
     """Get the data from the temperature_humidity table"""
     return await get_rows(
-        _temperature_humidity_query,
+        _temperature_humidity_query, device,
         int(start_date.timestamp()), int(end_date.timestamp())
     )
 
@@ -165,7 +167,7 @@ async def get_temperature_humidity_records(
 ) -> AsyncGenerator[list[dict], None]:
     """Get the data from the temperature_humidity table"""
     async for sss in get_many_rows(
-        _temperature_humidity_query,
+        _temperature_humidity_query, device,
         int(start_date.timestamp()), int(end_date.timestamp())
     ):
         yield sss
