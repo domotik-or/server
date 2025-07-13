@@ -17,7 +17,7 @@ aiosqlite = "WARNING"
 db = "INFO"
 
 [devices]
-temperature_humidity = ["sejour", "chambre_haut", "exterieur"]
+temperature_humidity = ["sejour", "chambre_haut", "outdoor"]
 events = ["doorbell"]
 
 [graph]
