@@ -45,7 +45,7 @@ async def plot_linky(days: int = 2):
     records = await get_all_linky_records(start_datetime, datetime.now(pytz.utc))
     for r in records:
         values.append(r[1])  # sinst
-        dts.append(datetime.utcfromtimestamp(r[2]))  # timestamp
+        dts.append(datetime.fromtimestamp(r[2]))  # timestamp
 
     # ax.set_title("Linky")
     ax.set_ylabel("VA")
@@ -70,7 +70,7 @@ async def plot_pressure(days: int = 3):
     records = await get_all_pressure_records(start_datetime, datetime.now(pytz.utc))
     for r in records:
         values.append(r[0])  # pressure
-        dts.append(datetime.utcfromtimestamp(r[1]))  # timestamp
+        dts.append(datetime.fromtimestamp(r[1]))  # timestamp
 
     # ax.set_title("Pressure")
     ax.set_ylabel("hPa")
@@ -104,7 +104,7 @@ async def plot_temperature_humidity(device: str, days: int = 2):
     for r in records:
         hmds.append(r[0])  # humidity
         tmps.append(r[1])  # temperature
-        dts.append(datetime.utcfromtimestamp(r[2]))  # timestamp
+        dts.append(datetime.fromtimestamp(r[2]))  # timestamp
 
     ax1.set_title("Humidity")
     ax1.set_ylabel("%RH")
