@@ -62,9 +62,12 @@ async def default_handle(request: web.Request):
 
     start_datetime = datetime.now() - timedelta(weeks=4)
     for events in config.devices["events"]:
-        tmpl_context["events"][events] = await get_all_on_off_records(
-            events, start_datetime, datetime.now()
-        )
+        tmpl_context["events"][events] = [
+            (evt[0], evt[1], datetime.fromtimestamp(evt[2]))
+            for evt in await get_all_on_off_records(
+                events, start_datetime, datetime.now()
+            )
+        ]
 
     return tmpl_context
 

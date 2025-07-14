@@ -40,7 +40,7 @@ body {
     <h2 style="text-align: center;">{{ dev }}</h2>
     <div class="box">
         {% for evt in evts %}
-        {{ evt["timestamp"].strftime("%Y/%m/%d %H:%M") }}<br>
+        {{ evt[2].strftime("%Y/%m/%d %H:%M") }}<br>
         {% endfor %}
     </div>
     {% endfor %}
