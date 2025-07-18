@@ -34,7 +34,7 @@ def _pressure_at_altitude(pressure: float) -> float:
     return pressure * pow(1.0 - config.general.altitude / 44330.0, 5.255)
 
 
-async def plot_linky(days: int = 2):
+async def plot_linky(days: int = 2) -> BytesIO:
     fig = Figure(figsize=(10, 4), constrained_layout=True)
     ax = fig.add_subplot()
 
@@ -59,7 +59,7 @@ async def plot_linky(days: int = 2):
     return buf
 
 
-async def plot_pressure(days: int = 3):
+async def plot_pressure(pmin: float, pmax: float, days: int = 3) -> BytesIO:
     fig = Figure(figsize=(10, 4), constrained_layout=True)
     ax = fig.add_subplot()
 
@@ -76,8 +76,8 @@ async def plot_pressure(days: int = 3):
     ax.set_ylabel("hPa")
     ax.set_ylim(
         auto=False,
-        ymin=_pressure_at_altitude(config.graph.pressure_min),
-        ymax=_pressure_at_altitude(config.graph.pressure_max)
+        ymin=_pressure_at_altitude(pmin),
+        ymax=_pressure_at_altitude(pmax)
     )
     set_axis_style(ax)
     ax.axhline(y=_pressure_at_altitude(1013.25), color='w', linestyle=':')
@@ -90,7 +90,9 @@ async def plot_pressure(days: int = 3):
     return buf
 
 
-async def plot_temperature_humidity(device: str, days: int = 2):
+async def plot_temperature_humidity(
+    device: str, hmin: float, hmax: float, tmin: float, tmax: float, days: int = 2
+) -> BytesIO:
     fig = Figure(figsize=(10, 8), constrained_layout=True)
     ax1, ax2 = fig.subplots(2, 1)
 
@@ -108,22 +110,14 @@ async def plot_temperature_humidity(device: str, days: int = 2):
 
     ax1.set_title("Humidity")
     ax1.set_ylabel("%RH")
-    ax1.set_ylim(
-        auto=False,
-        ymin=config.graph.indoor_hygrometry_min,
-        ymax=config.graph.indoor_hygrometry_max
-    )
+    ax1.set_ylim( auto=False, ymin=hmin, ymax=hmax)
     set_axis_style(ax1)
     ax1.plot(dts, hmds, color="deepskyblue", linewidth=2)
 
     ax2.set_title("Temperature")
     ax2.set_ylabel("°C")
     set_axis_style(ax2)
-    ax2.set_ylim(
-        auto=False,
-        ymin=config.graph.indoor_temperature_min,
-        ymax=config.graph.indoor_temperature_max
-    )
+    ax2.set_ylim(auto=False, ymin=tmin, ymax=tmax)
     ax2.plot(dts, tmps, color="orange", linewidth=2)
 
     fig.autofmt_xdate(rotation=30, ha="right", which="both")

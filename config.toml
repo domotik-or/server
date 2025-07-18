@@ -5,25 +5,40 @@ port = 8085
 [database]
 path = "/home/domotik/database/domotik.db"
 
-[secret]
-env_path = "/home/domotik/.config/domotik/server.env"
-env_names = [""]
-
 [logger]
 aiohttp = "WARNING"
 aiosqlite = "WARNING"
 
 [logger.server]
 db = "INFO"
+graph = "INFO"
 
-[devices]
-temperature_humidity = ["sejour", "chambre_haut", "outdoor"]
-events = ["doorbell"]
+[device.doorbell]
+type = "event"
+trigger = "raising"
 
-[graph]
-pressure_min = 985
-pressure_max = 1035
-indoor_temperature_min = 10.0
-indoor_temperature_max = 28.0
-indoor_hygrometry_min = 40.0
-indoor_hygrometry_max = 90.0
+[device.pressure]
+type = "atmospheric_pressure"
+min = 985.0
+max = 1035.0
+
+[device.chambre_haut]
+type = "humidity_temperature"
+temperature_min = 10.0
+temperature_max = 30.0
+humidity_min = 40.0
+humidity_max = 90.0
+
+[device.sejour]
+type = "humidity_temperature"
+temperature_min = 8.0
+temperature_max = 26.0
+humidity_min = 40.0
+humidity_max = 90.0
+
+[device.outdoor]
+type = "humidity_temperature"
+temperature_min = -5.0
+temperature_max = 45.0
+humidity_min = 20.0
+humidity_max = 90.0

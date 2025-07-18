@@ -1,9 +1,29 @@
 from dataclasses import dataclass
+from enum import auto
+from enum import Enum
+
+
+class TriggerType(Enum):
+    both = auto()
+    raising = auto()
+    falling = auto()
+
+
+@dataclass
+class AtmosphericPressureConfig:
+    min: float
+    max: float
 
 
 @dataclass
 class DatabaseConfig:
     path: str
+
+
+@dataclass
+class EventConfig:
+    name: str
+    trigger: TriggerType
 
 
 @dataclass
@@ -13,14 +33,9 @@ class GeneralConfig:
 
 
 @dataclass
-class GraphConfig:
-    pressure_min: float
-    pressure_max: float
-    indoor_temperature_min: float
-    indoor_temperature_max: float
-    indoor_hygrometry_min: float
-    indoor_hygrometry_max: float
-
-
-class SecretConfig:
-    pass
+class HumidityTemperatureConfig:
+    humidity_min: float
+    humidity_max: float
+    name: str
+    temperature_min: float
+    temperature_max: float

@@ -5,17 +5,19 @@ import tomllib
 
 from dotenv import load_dotenv
 
+from server.typem import AtmosphericPressureConfig
 from server.typem import DatabaseConfig
+from server.typem import EventConfig
 from server.typem import GeneralConfig
-from server.typem import GraphConfig
-from server.typem import SecretConfig
+from server.typem import HumidityTemperatureConfig
+from server.typem import TriggerType
 
 database = None
-devices = None
+events = []
 general = None
-graph = None
+humidity_temperatures = []
 loggers = {}
-secret = None
+atmospheric_pressure = None
 
 
 def read(config_filename: str):
@@ -23,31 +25,35 @@ def read(config_filename: str):
     with open(config_file, "rb") as f:
         raw_config = tomllib.load(f)
 
-    global devices
-    devices = raw_config["devices"]
+    global events
+    global humidity_temperatures
+    global atmospheric_pressure
+    devices = raw_config["device"]
+    for name, device in devices.items():
+        device_type = device.pop("type")
+        if device_type == "event":
+            device["name"] = name
+            try:
+                trigger_type = TriggerType[device["trigger"]]
+            except KeyError as exc:
+                raise Exception(f"unknown trigger type: {trigger_type }") from exc
+            events.append(EventConfig(name, trigger_type))
+        elif device_type == "humidity_temperature":
+            device["name"] = name
+            humidity_temperatures.append(HumidityTemperatureConfig(**device))
+        elif device_type == "atmospheric_pressure":
+            atmospheric_pressure = AtmosphericPressureConfig(**device)
+        else:
+            raise Exception(f"unknown type: {device_type}")
 
     global general
     general = GeneralConfig(**raw_config["general"])
-
-    global graph
-    graph = GraphConfig(**raw_config["graph"])
 
     global database
     database = DatabaseConfig(**raw_config["database"])
 
     global loggers
     loggers = raw_config["logger"]
-
-    # store secrets data in config class
-    global secret
-    load_dotenv(raw_config["secret"]["env_path"])
-    secret = SecretConfig()
-    for v in raw_config["secret"]["env_names"]:
-        value = getenv(v)
-        if value is None:
-            # not logging system configured yet!
-            sys.stderr.write(f"Missing environment variables {v}\n")
-        setattr(secret, v.lower(), value)
 
 
 if __name__ == "__main__":

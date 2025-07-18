@@ -45,27 +45,31 @@ async def default_handle(request: web.Request):
         "images": {}
     }
 
-    # images
-
     # pressure and linky
     buf_linky = await plot_linky()
     tmpl_context["images"]["linky"] = base64.b64encode(buf_linky.getbuffer()).decode("ascii")
-    buf_pressure = await plot_pressure()
+    device = config.atmospheric_pressure
+    buf_pressure = await plot_pressure(device.min, device.max)
     tmpl_context["images"]["pressure"] = base64.b64encode(buf_pressure.getbuffer()).decode("ascii")
 
-    # temperture and humidity
-    for device in config.devices["temperature_humidity"]:
-        buf = await plot_temperature_humidity(device)
-        tmpl_context["images"][device] = base64.b64encode(buf.getbuffer()).decode("ascii")
+    # temperature and humidity
+    for device in config.humidity_temperatures:
+        name = device.name
+        buf = await plot_temperature_humidity(
+            name,
+            device.humidity_min, device.humidity_max,
+            device.temperature_min, device.temperature_max
+        )
+        tmpl_context["images"][name] = base64.b64encode(buf.getbuffer()).decode("ascii")
 
     # events
-
     start_datetime = datetime.now() - timedelta(weeks=4)
-    for events in config.devices["events"]:
-        tmpl_context["events"][events] = [
+    for device in config.events:
+        name = device.name
+        tmpl_context["events"][name] = [
             (evt[0], evt[1], datetime.fromtimestamp(evt[2]))
             for evt in await get_all_on_off_records(
-                events, start_datetime, datetime.now()
+                name, start_datetime, datetime.now()
             )
         ]
 
@@ -313,7 +317,6 @@ def sigterm_handler(_signo, _stack_frame):
     sys.exit(0)
 
 
-config.read("/home/domotik/.config/domotik/server.toml")
 app = make_app()
 
 
