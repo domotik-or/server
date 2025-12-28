@@ -40,5 +40,5 @@ humidity_max = 90.0
 type = "humidity_temperature"
 temperature_min = -5.0
 temperature_max = 45.0
-humidity_min = 20.0
-humidity_max = 90.0
+humidity_min = 0.0
+humidity_max = 100.0
