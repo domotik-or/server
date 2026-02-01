@@ -1,43 +1,54 @@
 [general]
 altitude = 326.0
+
+[server]
+address = "192.168.1.53"
 port = 8085
 
 [database]
 path = "/home/domotik/database/domotik.db"
 
-[logger]
-aiohttp = "WARNING"
-aiosqlite = "WARNING"
+[[logger]]
+module = "aiohttp"
+level= "WARNING"
 
-[logger.server]
-db = "INFO"
-graph = "INFO"
+[[logger]]
+module = "aiosqlite"
+level = "WARNING"
+
+[[logger]]
+module = "server.db"
+level = "INFO"
+
+[[logger]]
+module = "server.serverm"
+level = "DEBUG"
 
 [device.doorbell]
 type = "event"
 trigger = "raising"
 
 [device.pressure]
-type = "atmospheric_pressure"
+type = "atmospheric-pressure"
 min = 985.0
 max = 1035.0
 
 [device.chambre_haut]
-type = "humidity_temperature"
+type = "temperature-humidity"
 temperature_min = 10.0
 temperature_max = 30.0
 humidity_min = 40.0
 humidity_max = 90.0
 
 [device.sejour]
-type = "humidity_temperature"
+type = "temperature-humidity"
 temperature_min = 8.0
 temperature_max = 26.0
 humidity_min = 40.0
 humidity_max = 90.0
 
 [device.outdoor]
-type = "humidity_temperature"
+type = "temperature-humidity"
 temperature_min = -5.0
 temperature_max = 45.0
 humidity_min = 20.0

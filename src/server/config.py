@@ -10,14 +10,16 @@ from server.typem import DatabaseConfig
 from server.typem import EventConfig
 from server.typem import GeneralConfig
 from server.typem import HumidityTemperatureConfig
+from server.typem import ServerConfig
 from server.typem import TriggerType
 
 database = None
 events = []
 general = None
-humidity_temperatures = []
+humidity_temperatures = {}
 loggers = {}
 atmospheric_pressure = None
+server = None
 
 
 def read(config_filename: str):
@@ -38,10 +40,9 @@ def read(config_filename: str):
             except KeyError as exc:
                 raise Exception(f"unknown trigger type: {trigger_type }") from exc
             events.append(EventConfig(name, trigger_type))
-        elif device_type == "humidity_temperature":
-            device["name"] = name
-            humidity_temperatures.append(HumidityTemperatureConfig(**device))
-        elif device_type == "atmospheric_pressure":
+        elif device_type == "temperature-humidity":
+            humidity_temperatures[name] = HumidityTemperatureConfig(**device)
+        elif device_type == "atmospheric-pressure":
             atmospheric_pressure = AtmosphericPressureConfig(**device)
         else:
             raise Exception(f"unknown type: {device_type}")
@@ -54,6 +55,9 @@ def read(config_filename: str):
 
     global loggers
     loggers = raw_config["logger"]
+
+    global server
+    server = ServerConfig(**raw_config["server"])
 
 
 if __name__ == "__main__":

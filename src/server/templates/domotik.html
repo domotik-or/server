@@ -22,28 +22,275 @@ body {
     display: block;
     margin: auto;
   }
+
+  table.striped tbody tr:nth-child(odd) {
+    background-color: LightSalmon;
+  }
+
+/* https://www.w3schools.com/howto/howto_js_tabs.asp */
+ /* Style the tab */
+.tab {
+  overflow: hidden;
+  border: 1px solid #ccc;
+  background-color: gray;
+}
+
+/* Style the buttons that are used to open the tab content */
+.tab button {
+  background-color: inherit;
+  float: left;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 14px 16px;
+  transition: 0.3s;
+}
+
+/* Change background color of buttons on hover */
+.tab button:hover {
+  background-color: #ddd;
+}
+
+/* Create an active/current tablink class */
+.tab button.active {
+  background-color: #ccc;
+}
+
+/* Style the tab content */
+.tabcontent {
+  display: none;
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-top: none;
+}
 </style>
-<meta http-equiv="refresh" content="300">
 </head>
 
 <body>
-    <h1>{{ datetime.strftime("%Y/%m/%d %H:%M") }}</h1>
-
-    {% for dev, img in images.items() %}
-    <h2 style="text-align: center;">{{ dev }}</h2>
-    <div><img src="data:image/png;base64,{{ img }}"/></div>
-    {% endfor %}
-
-    <h2 style="text-align: center;">Events</h2>
-
-    {% for dev, evts in events.items() %}
-    <h2 style="text-align: center;">{{ dev }}</h2>
-    <div class="box">
-        {% for evt in evts %}
-        {{ evt[2].strftime("%Y/%m/%d %H:%M") }}<br>
-        {% endfor %}
+    <div class="tab">
+      <button class="tablinks" onclick="openTab(event, 'energy'); poll();">energy</button>
+      <button class="tablinks" onclick="openTab(event, 'events'); poll();">events</button>
+      <button class="tablinks" onclick="openTab(event, 'outdoor'); poll();">outdoor</button>
+      <button class="tablinks" onclick="openTab(event, 'indoor'); poll();">indoor</button>
     </div>
-    {% endfor %}
+
+    <h1 id="datetime"></h1>
+
+    <!-- Tab content -->
+    <div id="energy" class="tabcontent">
+        <img id="linky-img" src="">
+    </div>
+
+    <!-- Tab content -->
+    <div id="events" class="tabcontent">
+    </div>
+
+    <!-- Tab content -->
+    <div id="outdoor" class="tabcontent">
+        <img id="pressure-img" src="">
+        <p>
+        <img id="temperature-humidity-img" src="">
+    </div>
+
+    <!-- Tab content -->
+    <div id="indoor" class="tabcontent">
+    </div>
 </body>
 
+<script>
+function openTab(evt, tabName) {
+  var i, tabcontent, tablinks;
+  tabcontent = document.getElementsByClassName("tabcontent");
+  for (i = 0; i < tabcontent.length; i++) {
+    tabcontent[i].style.display = "none";
+  }
+  tablinks = document.getElementsByClassName("tablinks");
+  for (i = 0; i < tablinks.length; i++) {
+    tablinks[i].className = tablinks[i].className.replace(" active", "");
+  }
+  document.getElementById(tabName).style.display = "block";
+  evt.currentTarget.className += " active";
+}
+
+function get_datetime() {
+    fetch("http://{{ server.address }}:{{ server.port }}/datetime")
+    .then(response => {
+        if (response.ok) {
+            return response.json();
+        } else {
+            return response.text().then(text => { throw new Error(text) });
+        }
+    })
+    .then(json => {
+        elem = document.getElementById("datetime");
+        elem.innerHTML = json.value;
+    })
+    .catch(err => {
+        console.log("error", err.message);
+    });
+}
+
+function energy() {
+    fetch("http://{{ server.address }}:{{ server.port }}/linky/image")
+    .then(response => {
+        if (response.ok) {
+            return response.blob();
+        } else {
+            return response.text().then(text => { throw new Error(text) });
+        }
+    })
+    .then(blob => {
+        const url = URL.createObjectURL(blob);
+        img = document.getElementById("linky-img");
+        img.src = url;
+    })
+    .catch(err => {
+        console.log("error", err.message);
+    });
+}
+
+function events() {
+    fetch("http://{{ server.address }}:{{ server.port }}/onoff/json")
+    .then(response => {
+        if (response.ok) {
+            return response.json();
+        } else {
+            return response.text().then(text => { throw new Error(text) });
+        }
+    })
+    .then(json => {
+        var elem = document.getElementById("events");
+        while (elem.firstChild) {
+            elem.removeChild(elem.lastChild);
+        };
+
+        for (const [key, value] of Object.entries(json)) {
+            var h1 = document.createElement("h1");
+            h1.innerHTML = key;
+            elem.appendChild(h1);
+
+            var table = document.createElement("table");
+            table.style.background = "Khaki";
+            table.style.margin = "0px auto";
+            table.style.borderCollapse = "collapse"
+            table.classList.add("striped");
+            var tbody = document.createElement("tbody");
+            for (const dt of value) {
+                var tr = document.createElement("tr");
+
+                var td = document.createElement("td");
+                td.style.padding = "5px";
+                var text = document.createTextNode(dt);
+
+                td.appendChild(text);
+                tr.appendChild(td);
+
+                tbody.appendChild(tr);
+            };
+            table.appendChild(tbody);
+            elem.appendChild(table);
+        };
+    })
+    .catch(err => {
+        console.log("error", err.message);
+    });
+}
+
+function indoor() {
+    var elem = document.getElementById("indoor");
+    while (elem.firstChild) {
+        elem.removeChild(elem.lastChild);
+    };
+
+    var sensors = {{ indoor_sensors | tojson }};
+    for (const [key, value] of Object.entries(sensors)) {
+        fetch("http://{{ server.address }}:{{ server.port }}/temperature_humidity/image/" + key)
+        .then(response => {
+            if (response.ok) {
+                return response.blob();
+            } else {
+                return response.text().then(text => { throw new Error(text) });
+            }
+        })
+        .then(blob => {
+            var h2 = document.createElement("h2");
+            h2.innerHTML = key;
+            elem.appendChild(h2);
+
+            var img = document.createElement("img");
+            const url = URL.createObjectURL(blob);
+            img.src = url;
+            elem.appendChild(text);
+        })
+        .catch(err => {
+            console.log("error", err.message);
+        });
+    };
+}
+
+function outdoor() {
+    fetch("http://{{ server.address }}:{{ server.port }}/pressure/image")
+    .then(response => {
+        if (response.ok) {
+            return response.blob();
+        } else {
+            return response.text().then(text => { throw new Error(text) });
+        }
+    })
+    .then(blob => {
+        const url = URL.createObjectURL(blob);
+        img = document.getElementById("pressure-img");
+        img.src = url;
+    })
+    .catch(err => {
+        console.log("error", err.message);
+    });
+
+    fetch("http://{{ server.address }}:{{ server.port }}/temperature_humidity/image/outdoor")
+    .then(response => {
+        if (response.ok) {
+            return response.blob();
+        } else {
+            return response.text().then(text => { throw new Error(text) });
+        }
+    })
+    .then(blob => {
+        const url = URL.createObjectURL(blob);
+        img = document.getElementById("temperature-humidity-img");
+        img.src = url;
+    })
+    .catch(err => {
+        console.log("error", err.message);
+    });
+}
+
+function poll() {
+  var i, tab_id, tabcontent;
+  tabcontent = document.getElementsByClassName("tabcontent");
+  for (i = 0; i < tabcontent.length; i++) {
+    if (tabcontent[i].style.display == "block") {
+      switch (tabcontent[i].id) {
+        case "energy":
+           get_datetime();
+           energy();
+           break;
+        case "events":
+           get_datetime();
+           events();
+           break;
+        case "indoor":
+           get_datetime();
+           indoor();
+           break;
+        case "outdoor":
+           get_datetime();
+           outdoor();
+           break;
+      }
+    }
+  }
+}
+
+setInterval(poll, 300000);
+</script>
 </html>

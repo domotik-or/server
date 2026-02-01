@@ -34,7 +34,7 @@ def _pressure_at_altitude(pressure: float) -> float:
     return pressure * pow(1.0 - config.general.altitude / 44330.0, 5.255)
 
 
-async def plot_linky(days: int = 2) -> BytesIO:
+async def plot_linky(days: int = 2) -> bytes:
     fig = Figure(figsize=(10, 4), constrained_layout=True)
     ax = fig.add_subplot()
 
@@ -47,7 +47,7 @@ async def plot_linky(days: int = 2) -> BytesIO:
         values.append(r[1])  # sinst
         dts.append(datetime.fromtimestamp(r[2]))  # timestamp
 
-    # ax.set_title("Linky")
+    ax.set_title("Linky")
     ax.set_ylabel("VA")
     set_axis_style(ax)
     ax.plot(dts, values, color="yellow")
@@ -56,10 +56,10 @@ async def plot_linky(days: int = 2) -> BytesIO:
 
     buf = BytesIO()
     fig.savefig(buf, format="png")
-    return buf
+    return buf.getvalue()
 
 
-async def plot_pressure(pmin: float, pmax: float, days: int = 3) -> BytesIO:
+async def plot_pressure(pmin: float, pmax: float, days: int = 3) -> bytes:
     fig = Figure(figsize=(10, 4), constrained_layout=True)
     ax = fig.add_subplot()
 
@@ -72,7 +72,7 @@ async def plot_pressure(pmin: float, pmax: float, days: int = 3) -> BytesIO:
         values.append(r[0])  # pressure
         dts.append(datetime.fromtimestamp(r[1]))  # timestamp
 
-    # ax.set_title("Pressure")
+    ax.set_title("Pressure")
     ax.set_ylabel("hPa")
     ax.set_ylim(
         auto=False,
@@ -87,12 +87,12 @@ async def plot_pressure(pmin: float, pmax: float, days: int = 3) -> BytesIO:
 
     buf = BytesIO()
     fig.savefig(buf, format="png")
-    return buf
+    return buf.getvalue()
 
 
 async def plot_temperature_humidity(
     device: str, hmin: float, hmax: float, tmin: float, tmax: float, days: int = 2
-) -> BytesIO:
+) -> bytes:
     fig = Figure(figsize=(10, 8), constrained_layout=True)
     ax1, ax2 = fig.subplots(2, 1)
 
@@ -124,7 +124,7 @@ async def plot_temperature_humidity(
 
     buf = BytesIO()
     fig.savefig(buf, format="png")
-    return buf
+    return buf.getvalue()
 
 
 async def close():

@@ -29,13 +29,21 @@ class EventConfig:
 @dataclass
 class GeneralConfig:
     altitude: float
-    port: int
 
 
 @dataclass
 class HumidityTemperatureConfig:
     humidity_min: float
     humidity_max: float
-    name: str
     temperature_min: float
     temperature_max: float
+
+
+@dataclass
+class ServerConfig:
+    address: str
+    port: int
+
+
+class ServerError(Exception):
+    pass
