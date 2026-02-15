@@ -220,7 +220,7 @@ function indoor() {
             var img = document.createElement("img");
             const url = URL.createObjectURL(blob);
             img.src = url;
-            elem.appendChild(text);
+            elem.appendChild(img);
         })
         .catch(err => {
             console.log("error", err.message);
