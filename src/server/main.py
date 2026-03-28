@@ -1,35 +1,27 @@
 import argparse
 import asyncio
 import logging
-from logging import StreamHandler
 import signal
 import sys
-
-from aiohttp import web
-import aiohttp_jinja2
-import aiohttp_cors
-import jinja2
 
 import server.config as config
 from server.db import close as db_close
 from server.db import init as db_init
 from server.graph import init as graph_init
+from server.logger import close as logger_close
+from server.logger import init as logger_init
 from server.serverm import make_app
 from server.serverm import close as server_close
 from server.serverm import init as server_init
-from server.utils import set_loggers_level
 
-logger = logging.getLogger()
-stream_handler = StreamHandler(stream=sys.stdout)
-formatter = logging.Formatter("%(asctime)s %(name)s %(levelname)s %(message)s")
-stream_handler.setFormatter(formatter)
-logger.addHandler(stream_handler)
-logger.setLevel(logging.DEBUG)
+# logger initial setup
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 async def init():
-    set_loggers_level(config.loggers)
 
+    logger_init(config.loggers)
     graph_init()
     await db_init()
     await server_init()
@@ -38,6 +30,7 @@ async def init():
 async def close():
     await db_close()
     await server_close()
+    logger_close()
 
 
 async def run(config_filename: str):

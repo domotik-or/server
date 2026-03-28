@@ -2,7 +2,6 @@ from datetime import datetime
 from datetime import timedelta
 from io import BytesIO
 
-from dateutil import parser as dateparser
 import matplotlib
 import matplotlib.dates as mdates
 import matplotlib.style
@@ -31,7 +30,7 @@ def set_axis_style(ax):
 
 
 def _pressure_at_altitude(pressure: float) -> float:
-    return pressure * pow(1.0 - config.general.altitude / 44330.0, 5.255)
+    return pressure * pow(1.0 - config.atmospheric_pressure.altitude / 44330.0, 5.255)
 
 
 async def plot_linky(days: int = 2) -> bytes:
@@ -110,7 +109,7 @@ async def plot_temperature_humidity(
 
     ax1.set_title("Humidity")
     ax1.set_ylabel("%RH")
-    ax1.set_ylim( auto=False, ymin=hmin, ymax=hmax)
+    ax1.set_ylim(auto=False, ymin=hmin, ymax=hmax)
     set_axis_style(ax1)
     ax1.plot(dts, hmds, color="deepskyblue", linewidth=2)
 

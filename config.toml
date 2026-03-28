@@ -1,8 +1,5 @@
-[general]
-altitude = 326.0
-
 [server]
-address = "192.168.1.53"
+address = "192.168.1.50"
 port = 8085
 
 [database]
@@ -30,6 +27,7 @@ trigger = "raising"
 
 [device.pressure]
 type = "atmospheric-pressure"
+altitude = 326.0
 min = 985.0
 max = 1035.0
 

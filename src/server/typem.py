@@ -11,6 +11,7 @@ class TriggerType(Enum):
 
 @dataclass
 class AtmosphericPressureConfig:
+    altitude: float
     min: float
     max: float
 
@@ -24,11 +25,6 @@ class DatabaseConfig:
 class EventConfig:
     name: str
     trigger: TriggerType
-
-
-@dataclass
-class GeneralConfig:
-    altitude: float
 
 
 @dataclass

@@ -1,24 +1,19 @@
-from os import getenv
 from pathlib import Path
-import sys
 import tomllib
-
-from dotenv import load_dotenv
 
 from server.typem import AtmosphericPressureConfig
 from server.typem import DatabaseConfig
 from server.typem import EventConfig
-from server.typem import GeneralConfig
 from server.typem import HumidityTemperatureConfig
 from server.typem import ServerConfig
 from server.typem import TriggerType
 
+atmospheric_pressure = None
 database = None
 events = []
 general = None
 humidity_temperatures = {}
 loggers = {}
-atmospheric_pressure = None
 server = None
 
 
@@ -27,8 +22,8 @@ def read(config_filename: str):
     with open(config_file, "rb") as f:
         raw_config = tomllib.load(f)
 
-    global events
-    global humidity_temperatures
+    global events  # noqa
+    global humidity_temperatures  # noqa
     global atmospheric_pressure
     devices = raw_config["device"]
     for name, device in devices.items():
@@ -38,7 +33,7 @@ def read(config_filename: str):
             try:
                 trigger_type = TriggerType[device["trigger"]]
             except KeyError as exc:
-                raise Exception(f"unknown trigger type: {trigger_type }") from exc
+                raise Exception(f"unknown trigger type: {trigger_type}") from exc
             events.append(EventConfig(name, trigger_type))
         elif device_type == "temperature-humidity":
             humidity_temperatures[name] = HumidityTemperatureConfig(**device)
@@ -46,9 +41,6 @@ def read(config_filename: str):
             atmospheric_pressure = AtmosphericPressureConfig(**device)
         else:
             raise Exception(f"unknown type: {device_type}")
-
-    global general
-    general = GeneralConfig(**raw_config["general"])
 
     global database
     database = DatabaseConfig(**raw_config["database"])
