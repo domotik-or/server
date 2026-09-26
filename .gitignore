@@ -1,14 +1,9 @@
 *~
 .*~
 __pycache__/
-*.pyc
-*.pyo
-*.egg-info/
 dist/
 build/
 .venv/
-.env/
-.cache/
 .env
 .mypy_cache
-.ropeproject/
+domotik.db

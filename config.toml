@@ -4,7 +4,7 @@ port = 8080
 
 [database]
 # path = "/home/domotik/database/domotik.db"
-path = "/home/franck/Documents/projets/domotique/server/domotik.db"
+path = "/home/franck/domotique/server/domotik.db"
 
 [[logger]]
 module = "aiohttp"

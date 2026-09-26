@@ -32,10 +32,10 @@ def make_app():
     app = web.Application()
 
     app.router.add_get("/", default_handle)
-    app.router.add_get("/set_east", set_east_handle)
+    app.router.add_get("/set_east/{value}", set_east_handle)
     app.router.add_get("/set_event/{name}", set_event_handle)
     app.router.add_get("/set_outdoor", set_outdoor_handle)
-    app.router.add_get("/set_sinsts", set_sinsts_handle)
+    app.router.add_get("/set_sinsts/{value}", set_sinsts_handle)
     app.router.add_get("/set_temperature_humidity", set_temperature_humidity_handle)
     app.router.add_get("/datetime", datetime_handle)
     app.router.add_get("/pressure/image", pressure_image_handle)
@@ -83,7 +83,7 @@ async def close():
 
 async def set_east_handle(request: web.Request) -> web.Response:
     try:
-        value = int(request.rel_url.query["east"])
+        value = int(request.rel_url.query["value"])
         month = int(request.rel_url.query["month"])
         year = int(request.rel_url.query["year"])
     except KeyError as exc:
@@ -147,7 +147,7 @@ async def set_outdoor_handle(request: web.Request) -> web.Response:
 
 async def set_sinsts_handle(request: web.Request) -> web.Response:
     try:
-        value = int(request.rel_url.query["value"])
+        value = int(request.match_info["value"])
     except KeyError as exc:
         raise web.HTTPBadRequest(reason=f"{exc}")
     except ServerError as exc:
