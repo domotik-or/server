@@ -20,7 +20,6 @@ logger.setLevel(logging.INFO)
 
 
 async def init():
-
     logger_init(config.loggers)
     graph_init()
     await db_init()

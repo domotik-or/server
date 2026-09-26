@@ -18,7 +18,13 @@ Update the package list:
 
     sudo apt-get update
 
-For the database:
+For the Sqlite3 database:
+
+.. code-block:: console
+
+    sudo apt install sqlite3
+
+For the Postgresql database:
 
 .. code-block:: console
 
@@ -32,8 +38,8 @@ Clone the repository
     git clone git@gitlab-snfbo.com:boble/domotik/serveur/server.git
     cd server
 
-Database setup
-==============
+Postgressql database setup
+==========================
 
 **Note**: in order for the postgresql authentication to work, you may have to
 change the authentication method from *peer* to *scram-sha-256* in PostgreSQL
@@ -80,7 +86,7 @@ If necessary, use a virtual Python environment:
 
 .. code-block:: console
 
-    python3 -m venv .venv --prompt server --upgrade-deps --break-package-system
+    python3 -m venv .venv --prompt server --upgrade-deps
     source .venv/bin/activate
 
 .. code-block:: console
@@ -98,7 +104,14 @@ Testing the server
 
 .. code-block:: console
 
-    wget -O - "localhost:8080/linky?start=1747224137,end=1747224159"
-    wget -O - "localhost:8080/onoff?start=1747224137,end=1747224159"
-    wget -O - "localhost:8080/pressure?start=1747224137,end=1747224159"
-    wget -O - "localhost:8080/temperature_humidity?start=1747224137,end=1747224159"
+    wget -O - "localhost:8080"
+    wget -O - "localhost:8080/set_east?value=2300000"
+    wget -O - "localhost:8080/set_event?name=ring
+    wget -O - "localhost:8080/set_outdoor?humidity=50&temperature=2400&pressure=97400
+    wget -O - "localhost:8080/set_sinsts?value=230
+    wget -O - "localhost:8080/set_temperature_humidity?temperature=2300&humidity=5100
+    wget -O - "localhost:8080/datetime
+
+    "/pressure/image"
+    "/sinsts/image"
+    "/temperature_humidity/image/{name}"

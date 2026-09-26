@@ -10,9 +10,9 @@ import pytz
 from qbstyles import mpl_style
 
 import server.config as config
-from server.db import get_all_linky_records
-from server.db import get_all_pressure_records
-from server.db import get_all_temperature_humidity_records
+from server.db import get_sinsts_records
+from server.db import get_pressure_records
+from server.db import get_temperature_humidity_records
 
 
 def init():
@@ -33,7 +33,7 @@ def _pressure_at_altitude(pressure: float) -> float:
     return pressure * pow(1.0 - config.atmospheric_pressure.altitude / 44330.0, 5.255)
 
 
-async def plot_linky(days: int = 2) -> bytes:
+async def plot_sinsts(days: int = 2) -> bytes:
     fig = Figure(figsize=(10, 4), constrained_layout=True)
     ax = fig.add_subplot()
 
@@ -41,7 +41,7 @@ async def plot_linky(days: int = 2) -> bytes:
     values = []
 
     start_datetime = datetime.now(pytz.utc) - timedelta(days=days)
-    records = await get_all_linky_records(start_datetime, datetime.now(pytz.utc))
+    records = await get_sinsts_records(start_datetime, datetime.now(pytz.utc))
     for r in records:
         values.append(r[1])  # sinst
         dts.append(datetime.fromtimestamp(r[2]))  # timestamp
@@ -66,7 +66,7 @@ async def plot_pressure(pmin: float, pmax: float, days: int = 3) -> bytes:
     values = []
 
     start_datetime = datetime.now(pytz.utc) - timedelta(days=days)
-    records = await get_all_pressure_records(start_datetime, datetime.now(pytz.utc))
+    records = await get_pressure_records(start_datetime, datetime.now(pytz.utc))
     for r in records:
         values.append(r[0])  # pressure
         dts.append(datetime.fromtimestamp(r[1]))  # timestamp
@@ -99,7 +99,7 @@ async def plot_temperature_humidity(
     hmds = []
     tmps = []
     start_datetime = datetime.now(pytz.utc) - timedelta(days=days)
-    records = await get_all_temperature_humidity_records(
+    records = await get_temperature_humidity_records(
         device, start_datetime, datetime.now(pytz.utc)
     )
     for r in records:

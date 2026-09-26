@@ -2,7 +2,6 @@ import asyncio
 from datetime import datetime
 from datetime import timedelta
 import logging
-from typing import AsyncGenerator
 from typing import Optional
 
 import aiosqlite
@@ -18,11 +17,53 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
+async def create_tables():
+    await _conn.execute(
+        "CREATE TABLE IF NOT EXISTS east ("
+        "    value INTEGER,"
+        "    timestamp TIMESTAMP(1) DEFAULT (STRFTIME('%s', 'NOW'))"
+        ");"
+    )
+
+    await _conn.execute(
+        "CREATE TABLE IF NOT EXISTS event ("
+        "    name VARCHAR(30),"
+        "    timestamp TIMESTAMP(1) DEFAULT (STRFTIME('%s', 'NOW'))"
+        ");"
+    )
+
+    await _conn.execute(
+        "CREATE TABLE IF NOT EXISTS sinsts ("
+        "    value INTEGER,"
+        "    timestamp TIMESTAMP(1) DEFAULT (STRFTIME('%s', 'NOW'))"
+        ");"
+    )
+
+    await _conn.execute(
+        "CREATE TABLE IF NOT EXISTS outdoor ("
+        "    humidity REAL,"
+        "    pressure REAL,"
+        "    temperature REAL,"
+        "    timestamp TIMESTAMP(1) DEFAULT (STRFTIME('%s', 'NOW'))"
+        ");"
+    )
+
+    await _conn.execute(
+        "CREATE TABLE IF NOT EXISTS temperature_humidity ("
+        "    device VARCHAR(30),"
+        "    humidity REAL,"
+        "    temperature REAL,"
+        "    timestamp TIMESTAMP(1) DEFAULT (STRFTIME('%s', 'NOW'))"
+        ");"
+    )
+
+
 async def init():
     global _conn
 
     try:
         _conn = await aiosqlite.connect(config.database.path, autocommit=True)
+        await create_tables()
     except Sqlite3Error as exc:
         logger.error(f"error while creating tables ({exc})")
 
@@ -32,21 +73,6 @@ async def get_rows(query: str, *args) -> Optional[list[Row]]:
         cur = await _conn.execute(query, args)
         return await cur.fetchall()
     return None
-
-
-async def get_many_rows(
-    query: str, *args, records_number: int = 100
-) -> AsyncGenerator[list[Row], None]:
-    try:
-        cur = await _conn.execute(query, args)
-    except Sqlite3Error as exc:
-        logger.error(f"error while executing query ({exc})")
-        return
-    while True:
-        records = await cur.fetchmany(records_number)
-        if len(records) == 0:
-            break
-        yield records
 
 
 async def execute_query(query: str, *args):
@@ -65,84 +91,53 @@ async def close():
         _conn = None
 
 
-_linky_query = (
-    "SELECT * FROM linky "
+_sinsts_query = (
+    "SELECT * FROM sinsts "
     "WHERE timestamp >= ? AND timestamp <= ? "
     "ORDER BY timestamp;"
 )
 
 
-async def get_all_linky_records(
+async def get_sinsts_records(
     start_date: datetime, end_date: datetime
 ) -> Optional[list[Row]]:
     """Get the linky data from the linky table"""
     return await get_rows(
-        _linky_query, int(start_date.timestamp()), int(end_date.timestamp())
+        _sinsts_query, int(start_date.timestamp()), int(end_date.timestamp())
     )
 
 
-async def get_linky_records(
-    start_date: datetime, end_date: datetime
-) -> AsyncGenerator[list[dict], None]:
-    """Get the linky data from the linky table"""
-    async for sss in get_many_rows(
-        _linky_query, int(start_date.timestamp()), int(end_date.timestamp())
-    ):
-        yield sss
-
-
-_on_off_query = (
-    "SELECT * FROM on_off "
+_event_query = (
+    "SELECT * FROM event "
     "WHERE device=$1 AND timestamp >= ? AND timestamp <= ? "
     "ORDER BY timestamp;"
 )
 
 
-async def get_all_on_off_records(
-    device: str, start_date: datetime, end_date: datetime
+async def get_event_records(
+    event: str, start_date: datetime, end_date: datetime
 ) -> Optional[list[Row]]:
-    """Get the on_off data from the on_off table"""
+    """Get the event data from the event table"""
     return await get_rows(
-        _on_off_query, device,
+        _event_query, device,
         int(start_date.timestamp()), int(end_date.timestamp())
     )
 
 
-async def get_on_off_records(
-    device: str, start_date: datetime, end_date: datetime
-) -> AsyncGenerator[list[dict], None]:
-    """Get the on_off data from the on_off table"""
-    async for sss in get_many_rows(
-        _on_off_query, device,
-        int(start_date.timestamp()), int(end_date.timestamp())
-    ):
-        yield sss
-
-
 _pressure_query = (
-    "SELECT * FROM pressure "
+    "SELECT * FROM outdoor "
     "WHERE timestamp >= ? AND timestamp <= ? "
     "ORDER BY timestamp;"
 )
 
 
-async def get_all_pressure_records(
+async def get_pressure_records(
     start_date: datetime, end_date: datetime
 ) -> Optional[list[Row]]:
-    """Get the pressure data from the pressure table"""
+    """Get the pressure data from the outdoor table"""
     return await get_rows(
         _pressure_query, int(start_date.timestamp()), int(end_date.timestamp())
     )
-
-
-async def get_pressure_records(
-    start_date: datetime, end_date: datetime
-) -> AsyncGenerator[list[dict], None]:
-    """Get the pressure data from the pressure table"""
-    async for prs in get_many_rows(
-        _pressure_query, int(start_date.timestamp()), int(end_date.timestamp())
-    ):
-        yield sss
 
 
 _temperature_humidity_query = (
@@ -152,7 +147,7 @@ _temperature_humidity_query = (
 )
 
 
-async def get_all_temperature_humidity_records(
+async def get_temperature_humidity_records(
     device: str, start_date: datetime, end_date: datetime
 ) -> Optional[list[Row]]:
     """Get the data from the temperature_humidity table"""
@@ -160,17 +155,6 @@ async def get_all_temperature_humidity_records(
         _temperature_humidity_query, device,
         int(start_date.timestamp()), int(end_date.timestamp())
     )
-
-
-async def get_temperature_humidity_records(
-    device: str, start_date: datetime, end_date: datetime
-) -> AsyncGenerator[list[dict], None]:
-    """Get the data from the temperature_humidity table"""
-    async for sss in get_many_rows(
-        _temperature_humidity_query, device,
-        int(start_date.timestamp()), int(end_date.timestamp())
-    ):
-        yield sss
 
 
 async def run(config_filename: str):
@@ -182,7 +166,7 @@ async def run(config_filename: str):
 
     try:
         # await execute_query(
-        #     "INSERT INTO on_off(device, state) VALUES (?, ?)", "doorbell", True
+        #     "INSERT INTO event(device, state) VALUES (?, ?)", "doorbell", True
         # )
         #
         # await execute_query(
@@ -193,13 +177,13 @@ async def run(config_filename: str):
         #     "INSERT INTO temperature_humidity(device, humidity, temperature) VALUES (?, ?, ?)",
         #     "sejour", 50.0, 21.0
         # )
-        await execute_query("DELETE FROM linky")
+        await execute_query("DELETE FROM sinsts")
         await execute_query(
-            "INSERT INTO linky(east, sinst) VALUES (?, ?)", 1000, 2000
+            "INSERT INTO sinsts(value) VALUES (?)", 1000
         )
         timestamp = datetime.now(pytz.utc)
 
-        rows = await get_all_linky_records(timestamp - timedelta(hours=1), timestamp)
+        rows = await get_insts_records(timestamp - timedelta(hours=1), timestamp)
         print(rows)
     finally:
         await close()

@@ -1,29 +1,22 @@
 import asyncio
-import base64
 from dataclasses import asdict
 from datetime import datetime
-from datetime import timedelta
 import logging
 from pathlib import Path
 import time
 
 from aiohttp import web
 # from aiohttp.web import HTTPOk
-from aiohttp.web import json_response
 # from aiohttp.web import Response
 import aiohttp_jinja2
 import aiohttp_cors
 import jinja2
 
 import server.config as config
-from server.graph import plot_linky
 from server.graph import plot_pressure
+from server.graph import plot_sinsts
 from server.graph import plot_temperature_humidity
-from server.db import get_linky_records
-from server.db import get_all_on_off_records
-from server.db import get_on_off_records
-from server.db import get_pressure_records
-from server.db import get_temperature_humidity_records
+from server.db import execute_query
 from server.typem import ServerError
 
 # logger initial setup
@@ -38,14 +31,14 @@ def make_app():
     app = web.Application()
 
     app.router.add_get("/", default_handle)
+    app.router.add_get("/set_east", set_east_handle)
+    app.router.add_get("/set_event/{name}", set_event_handle)
+    app.router.add_get("/set_outdoor", set_outdoor_handle)
+    app.router.add_get("/set_sinsts", set_sinsts_handle)
+    app.router.add_get("/set_temperature_humidity", set_temperature_humidity_handle)
     app.router.add_get("/datetime", datetime_handle)
-    app.router.add_get("/linky/csv", linky_csv_handle)
-    app.router.add_get("/linky/image", linky_image_handle)
-    app.router.add_get("/onoff/csv", onoff_csv_handle)
-    app.router.add_get("/onoff/json", onoff_json_handle)
-    app.router.add_get("/pressure/csv", pressure_csv_handle)
     app.router.add_get("/pressure/image", pressure_image_handle)
-    app.router.add_get("/temperature_humidity/csv", temperature_humidity_csv_handle)
+    app.router.add_get("/sinsts/image", sinsts_image_handle)
     app.router.add_get("/temperature_humidity/image/{name}", temperature_humidity_image_handle)
 
     cors = aiohttp_cors.setup(app, defaults={
@@ -87,6 +80,100 @@ async def close():
     pass
 
 
+async def set_east_handle(request: web.Request) -> web.StreamResponse:
+    try:
+        value = int(request.rel_url.query["value"])
+    except KeyError as exc:
+        raise web.HTTPBadRequest(reason=f"{exc}")
+    except ServerError as exc:
+        return web.HTTPInternalServerError(reason=str(exc))
+
+    # store values in db
+    await execute_query(
+        "INSERT INTO east(value) VALUES (?)",
+        value
+    )
+
+    data = int(datetime.now().timestamp())
+    return web.Response(text=str(data))
+
+
+async def set_event_handle(request: web.Request) -> web.StreamResponse:
+    try:
+        name = request.match_info["name"]
+    except KeyError as exc:
+        raise web.HTTPBadRequest(reason=f"{exc}")
+    except ServerError as exc:
+        return web.HTTPInternalServerError(reason=str(exc))
+
+    # store values in db
+    await execute_query(
+        "INSERT INTO event(name) VALUES (?)",
+        name
+    )
+
+    data = int(datetime.now().timestamp())
+    return web.Response(text=str(data))
+
+
+async def set_outdoor_handle(request: web.Request) -> web.StreamResponse:
+    try:
+        humidity = int(request.rel_url.query["humidity"])
+        temperature = int(request.rel_url.query["temperature"])
+        pressure = int(request.rel_url.query["pressure"])
+    except KeyError as exc:
+        raise web.HTTPBadRequest(reason=f"{exc}")
+    except ServerError as exc:
+        return web.HTTPInternalServerError(reason=str(exc))
+
+    # store values in db
+    await execute_query(
+        "INSERT INTO outdoor(temperature, humidity, pressure) VALUES (?, ?, ?)",
+        temperature / 100.0, humidity / 100.0, pressure / 100.0
+    )
+
+    data = int(datetime.now().timestamp())
+    return web.Response(text=str(data))
+
+
+async def set_sinsts_handle(request: web.Request) -> web.StreamResponse:
+    try:
+        value = int(request.rel_url.query["value"])
+    except KeyError as exc:
+        raise web.HTTPBadRequest(reason=f"{exc}")
+    except ServerError as exc:
+        return web.HTTPInternalServerError(reason=str(exc))
+
+    # store values in db
+    await execute_query(
+        "INSERT INTO sinsts(value) VALUES (?)",
+        value
+    )
+
+    data = int(datetime.now().timestamp())
+    return web.Response(text=str(data))
+
+
+async def set_temperature_humidity_handle(request: web.Request) -> web.StreamResponse:
+    try:
+        device = request.rel_url.query["device"]
+        humidity = int(request.rel_url.query["humidity"])
+        temperature = int(request.rel_url.query["temperature"])
+    except KeyError as exc:
+        raise web.HTTPBadRequest(reason=f"{exc}")
+    except ServerError as exc:
+        return web.HTTPInternalServerError(reason=str(exc))
+
+    # store values in db
+    await execute_query(
+        "INSERT INTO temperature_humidity(device, humidity, temperature) VALUES (?, ?, ?)",
+        device, humidity / 100.0, temperature / 100.0
+    )
+
+    data = int(datetime.now().timestamp())
+    return web.Response(text=str(data))
+
+
 @aiohttp_jinja2.template("domotik.html")
 async def default_handle(request: web.Request):
 
@@ -125,121 +212,12 @@ async def datetime_handle(request: web.Request) -> web.Response:
     return web.json_response(data)
 
 
-async def linky_image_handle(request: web.Request) -> web.StreamResponse:
+async def sinsts_image_handle(request: web.Request) -> web.StreamResponse:
     try:
-        data = await plot_linky()
+        data = await plot_sinsts()
         return web.Response(body=data, content_type="image/png")
     except ServerError as exc:
         return web.HTTPInternalServerError(reason=str(exc))
-
-
-async def linky_csv_handle(request: web.Request) -> web.StreamResponse:
-    start_date, end_date = _get_common_parameters(request)
-
-    filename = f"linky-{datetime.now().strftime('%Y%m%d%H%M%S')}.csv"
-    response = web.StreamResponse(
-        status=200,
-        reason="OK",
-        headers={
-            "Content-Type": "text/csv",
-            "Content-Disposition": f"Attachment; filename={filename}"
-        },
-    )
-    await response.prepare(request)
-
-    # send csv header
-    await response.write("timestamp, east, sinst\n".encode())
-
-    async for lks in get_linky_records(start_date, end_date):
-        if len(lks) == 0:
-            break
-
-        csv = ""
-        for lk in lks:
-            csv += f"{lk['timestamp']}, {lk['east']}, {lk['sinst']}\n"
-
-        await response.write(csv.encode())
-
-    await response.write_eof()
-    return response
-
-
-async def onoff_csv_handle(request: web.Request) -> web.StreamResponse:
-    start_date, end_date = _get_common_parameters(request)
-
-    filename = f"onoff-{datetime.now().strftime('%Y%m%d%H%M%S')}.csv"
-    response = web.StreamResponse(
-        status=200,
-        reason="OK",
-        headers={
-            "Content-Type": "text/csv",
-            "Content-Disposition": f"Attachment; filename={filename}"
-        },
-    )
-    await response.prepare(request)
-
-    # send csv header
-    await response.write("timestamp, device, state\n".encode())
-
-    async for oos in get_on_off_records(start_date, end_date):
-        if len(oos) == 0:
-            break
-
-        csv = ""
-        for oo in oos:
-            csv += f"{oo['timestamp']}, {oo['device']}, {oo['state']}\n"
-
-        await response.write(csv.encode())
-
-    await response.write_eof()
-    return response
-
-
-async def onoff_json_handle(request: web.Request) -> web.Response:
-    start_datetime = datetime.now() - timedelta(weeks=4)
-    data = {}
-    for device in config.events:
-        name = device.name
-        if name not in data:
-            data[name] = []
-        data[name] += [
-            (datetime.fromtimestamp(evt[2]).strftime("%Y/%m/%d %H:%M"))
-            for evt in await get_all_on_off_records(
-                name, start_datetime, datetime.now()
-            )
-        ]
-    return web.json_response(data)
-
-
-async def pressure_csv_handle(request: web.Request) -> web.StreamResponse:
-    start_date, end_date = _get_common_parameters(request)
-
-    filename = f"pressure-{datetime.now().strftime('%Y%m%d%H%M%S')}.csv"
-    response = web.StreamResponse(
-        status=200,
-        reason="OK",
-        headers={
-            "Content-Type": "text/csv",
-            "Content-Disposition": f"Attachment; filename={filename}"
-        },
-    )
-    await response.prepare(request)
-
-    # send csv header
-    await response.write("timestamp, pressure\n".encode())
-
-    async for prs in get_pressure_records(start_date, end_date):
-        if len(prs) == 0:
-            break
-
-        csv = ""
-        for pr in prs:
-            csv += f"{pr['timestamp']}, {pr['pressure']}\n"
-
-        await response.write(csv.encode())
-
-    await response.write_eof()
-    return response
 
 
 async def pressure_image_handle(request: web.Request) -> web.StreamResponse:
@@ -249,41 +227,6 @@ async def pressure_image_handle(request: web.Request) -> web.StreamResponse:
         return web.Response(body=data, content_type="image/png")
     except ServerError as exc:
         return web.HTTPInternalServerError(reason=str(exc))
-
-
-async def temperature_humidity_csv_handle(request: web.Request) -> web.StreamResponse:
-    start_date, end_date = _get_common_parameters(request)
-    try:
-        name = request.rel_url.query["name"]
-    except KeyError:
-        raise web.HTTPBadRequest(reason="device: missing parameter")
-
-    filename = f"temperature_humidity-{datetime.now().strftime('%Y%m%d%H%M%S')}.csv"
-    response = web.StreamResponse(
-        status=200,
-        reason="OK",
-        headers={
-            "Content-Type": "text/csv",
-            "Content-Disposition": f"Attachment; filename={filename}"
-        },
-    )
-    await response.prepare(request)
-
-    # send csv header
-    await response.write("timestamp, name, humidity, temperature\n".encode())
-
-    async for sss in get_temperature_humidity_records(name, start_date, end_date):
-        if len(sss) == 0:
-            break
-
-        csv = ""
-        for ss in sss:
-            csv += f"{ss['timestamp']}, {ss['humidity']}, {ss['temperature']}\n"
-
-        await response.write(csv.encode())
-
-    await response.write_eof()
-    return response
 
 
 async def temperature_humidity_image_handle(request: web.Request) -> web.StreamResponse:

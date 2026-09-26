@@ -78,7 +78,7 @@ body {
 
     <!-- Tab content -->
     <div id="energy" class="tabcontent">
-        <img id="linky-img" src="">
+        <img id="sinsts-img" src="">
     </div>
 
     <!-- Tab content -->
@@ -131,7 +131,7 @@ function get_datetime() {
 }
 
 function energy() {
-    fetch("http://{{ server.address }}:{{ server.port }}/linky/image")
+    fetch("http://{{ server.address }}:{{ server.port }}/sinsts/image")
     .then(response => {
         if (response.ok) {
             return response.blob();
@@ -141,7 +141,7 @@ function energy() {
     })
     .then(blob => {
         const url = URL.createObjectURL(blob);
-        img = document.getElementById("linky-img");
+        img = document.getElementById("sinsts-img");
         img.src = url;
     })
     .catch(err => {
