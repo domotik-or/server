@@ -22,7 +22,7 @@ async def create_tables():
         "CREATE TABLE IF NOT EXISTS east ("
         "    value INTEGER,"
         "    month INTEGER,"
-        "    year INTEGER,"
+        "    year INTEGER"
         ");"
     )
 
