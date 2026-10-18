@@ -150,7 +150,7 @@ function energy() {
 }
 
 function events() {
-    fetch("http://{{ server.address }}:{{ server.port }}/onoff/json")
+    fetch("http://{{ server.address }}:{{ server.port }}/event/json")
     .then(response => {
         if (response.ok) {
             return response.json();
@@ -204,7 +204,7 @@ function indoor() {
 
     var sensors = {{ indoor_sensors | tojson }};
     for (const [key, value] of Object.entries(sensors)) {
-        fetch("http://{{ server.address }}:{{ server.port }}/temperature_humidity/image/" + key)
+        fetch("http://{{ server.address }}:{{ server.port }}/temperature_humidity/" + key + " image")
         .then(response => {
             if (response.ok) {
                 return response.blob();
@@ -246,7 +246,7 @@ function outdoor() {
         console.log("error", err.message);
     });
 
-    fetch("http://{{ server.address }}:{{ server.port }}/temperature_humidity/image/outdoor")
+    fetch("http://{{ server.address }}:{{ server.port }}/temperature_humidity/outdoor/image")
     .then(response => {
         if (response.ok) {
             return response.blob();

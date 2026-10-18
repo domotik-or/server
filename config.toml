@@ -1,5 +1,5 @@
 [server]
-address = "192.168.1.59"
+address = "192.168.1.58"
 port = 8080
 
 [database]
@@ -22,6 +22,9 @@ level = "INFO"
 module = "server.serverm"
 level = "DEBUG"
 
+[device.ring]
+type = "event"
+
 [device.pressure]
 type = "atmospheric-pressure"
 altitude = 326.0
@@ -30,7 +33,7 @@ max = 1035.0
 
 [device.outdoor]
 type = "temperature-humidity"
-temperature_min = 10.0
-temperature_max = 30.0
-humidity_min = 40.0
-humidity_max = 90.0
+temperature_min = -10.0
+temperature_max = 50.0
+humidity_min = 0.0
+humidity_max = 100.0

@@ -41,10 +41,8 @@ async def create_tables():
     )
 
     await _conn.execute(
-        "CREATE TABLE IF NOT EXISTS outdoor ("
-        "    humidity REAL,"
+        "CREATE TABLE IF NOT EXISTS pressure ("
         "    pressure REAL,"
-        "    temperature REAL,"
         "    timestamp TIMESTAMP(1) DEFAULT (STRFTIME('%s', 'NOW'))"
         ");"
     )
@@ -110,23 +108,23 @@ async def get_sinsts_records(
 
 _event_query = (
     "SELECT * FROM event "
-    "WHERE device=? AND timestamp >= ? AND timestamp <= ? "
+    "WHERE name=$1 AND timestamp >= ? AND timestamp <= ? "
     "ORDER BY timestamp;"
 )
 
 
 async def get_event_records(
-    event: str, start_date: datetime, end_date: datetime
+    name: str, start_date: datetime, end_date: datetime
 ) -> Optional[list[Row]]:
     """Get the event data from the event table"""
     return await get_rows(
-        _event_query, device,
+        _event_query, name,
         int(start_date.timestamp()), int(end_date.timestamp())
     )
 
 
 _pressure_query = (
-    "SELECT * FROM outdoor "
+    "SELECT * FROM pressure "
     "WHERE timestamp >= ? AND timestamp <= ? "
     "ORDER BY timestamp;"
 )

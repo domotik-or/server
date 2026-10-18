@@ -6,7 +6,6 @@ from server.typem import DatabaseConfig
 from server.typem import EventConfig
 from server.typem import HumidityTemperatureConfig
 from server.typem import ServerConfig
-from server.typem import TriggerType
 
 atmospheric_pressure = None
 database = None
@@ -30,11 +29,7 @@ def read(config_filename: str):
         device_type = device.pop("type")
         if device_type == "event":
             device["name"] = name
-            try:
-                trigger_type = TriggerType[device["trigger"]]
-            except KeyError as exc:
-                raise Exception(f"unknown trigger type: {trigger_type}") from exc
-            events.append(EventConfig(name, trigger_type))
+            events.append(EventConfig(name))
         elif device_type == "temperature-humidity":
             humidity_temperatures[name] = HumidityTemperatureConfig(**device)
         elif device_type == "atmospheric-pressure":

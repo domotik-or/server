@@ -1,6 +1,7 @@
 import asyncio
 from dataclasses import asdict
 from datetime import datetime
+from datetime import timedelta
 import logging
 from pathlib import Path
 import time
@@ -17,7 +18,11 @@ from server.graph import plot_pressure
 from server.graph import plot_sinsts
 from server.graph import plot_temperature_humidity
 from server.db import execute_query
+<<<<<<< HEAD
 from server.db import get_rows
+=======
+from server.db import get_event_records
+>>>>>>> 93a84b1 (update)
 from server.typem import ServerError
 
 # logger initial setup
@@ -38,9 +43,10 @@ def make_app():
     app.router.add_get("/set_sinsts/{value}", set_sinsts_handle)
     app.router.add_get("/set_temperature_humidity", set_temperature_humidity_handle)
     app.router.add_get("/datetime", datetime_handle)
+    app.router.add_get("/event/json", event_json_handle)
     app.router.add_get("/pressure/image", pressure_image_handle)
     app.router.add_get("/sinsts/image", sinsts_image_handle)
-    app.router.add_get("/temperature_humidity/image/{name}", temperature_humidity_image_handle)
+    app.router.add_get("/temperature_humidity/{name}/image", temperature_humidity_image_handle)
 
     cors = aiohttp_cors.setup(app, defaults={
         "*": aiohttp_cors.ResourceOptions(
@@ -137,8 +143,12 @@ async def set_outdoor_handle(request: web.Request) -> web.Response:
 
     # store values in db
     await execute_query(
-        "INSERT INTO outdoor(temperature, humidity, pressure) VALUES (?, ?, ?)",
-        temperature / 100.0, humidity / 100.0, pressure / 100.0
+        "INSERT INTO pressure(pressure) VALUES (?)",
+        pressure / 100.0
+    )
+    await execute_query(
+        "INSERT INTO temperature_humidity(device, humidity, temperature) VALUES ('outdoor', ?, ?)",
+        humidity / 100.0, temperature / 100.0
     )
 
     data = int(datetime.now().timestamp())
@@ -218,6 +228,22 @@ def _get_common_parameters(request: web.Request) -> tuple[datetime, datetime]:
 
 async def datetime_handle(request: web.Request) -> web.Response:
     data = {"value": datetime.now().strftime("%Y/%m/%d %H:%M:%S")}
+    return web.json_response(data)
+
+
+async def event_json_handle(request: web.Request) -> web.Response:
+    start_datetime = datetime.now() - timedelta(weeks=4)
+    data = {}
+    for device in config.events:
+        name = device.name
+        if name not in data:
+            data[name] = []
+        data[name] += [
+            (datetime.fromtimestamp(evt[1]).strftime("%Y/%m/%d %H:%M"))
+            for evt in await get_event_records(
+                name, start_datetime, datetime.now()
+            )
+        ]
     return web.json_response(data)
 
 

@@ -43,8 +43,8 @@ async def plot_sinsts(days: int = 2) -> bytes:
     start_datetime = datetime.now(pytz.utc) - timedelta(days=days)
     records = await get_sinsts_records(start_datetime, datetime.now(pytz.utc))
     for r in records:
-        values.append(r[1])  # sinst
-        dts.append(datetime.fromtimestamp(r[2]))  # timestamp
+        values.append(r[0])  # sinst
+        dts.append(datetime.fromtimestamp(r[1]))  # timestamp
 
     ax.set_title("Linky")
     ax.set_ylabel("VA")

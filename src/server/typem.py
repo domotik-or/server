@@ -3,12 +3,6 @@ from enum import auto
 from enum import Enum
 
 
-class TriggerType(Enum):
-    both = auto()
-    raising = auto()
-    falling = auto()
-
-
 @dataclass
 class AtmosphericPressureConfig:
     altitude: float
@@ -24,7 +18,6 @@ class DatabaseConfig:
 @dataclass
 class EventConfig:
     name: str
-    trigger: TriggerType
 
 
 @dataclass
