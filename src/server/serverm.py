@@ -18,11 +18,8 @@ from server.graph import plot_pressure
 from server.graph import plot_sinsts
 from server.graph import plot_temperature_humidity
 from server.db import execute_query
-<<<<<<< HEAD
-from server.db import get_rows
-=======
 from server.db import get_event_records
->>>>>>> 93a84b1 (update)
+from server.db import get_rows
 from server.typem import ServerError
 
 # logger initial setup
