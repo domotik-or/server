@@ -17,6 +17,7 @@ from server.graph import plot_pressure
 from server.graph import plot_sinsts
 from server.graph import plot_temperature_humidity
 from server.db import execute_query
+from server.db import get_rows
 from server.typem import ServerError
 
 # logger initial setup
@@ -80,25 +81,33 @@ async def close():
     pass
 
 
-async def set_east_handle(request: web.Request) -> web.StreamResponse:
+async def set_east_handle(request: web.Request) -> web.Response:
     try:
-        value = int(request.rel_url.query["value"])
+        value = int(request.rel_url.query["east"])
+        month = int(request.rel_url.query["month"])
+        year = int(request.rel_url.query["year"])
     except KeyError as exc:
         raise web.HTTPBadRequest(reason=f"{exc}")
     except ServerError as exc:
         return web.HTTPInternalServerError(reason=str(exc))
 
-    # store values in db
-    await execute_query(
-        "INSERT INTO east(value) VALUES (?)",
-        value
+    # test whether the year and month already exist
+    rows = await get_rows(
+        "SELECT * FROM east WHERE month=? AND year=?", month, year
     )
+
+    if rows is None:
+        # store values in db
+        await execute_query(
+            "INSERT INTO east(value, month, year) VALUES (?)",
+            value, month, year
+        )
 
     data = int(datetime.now().timestamp())
     return web.Response(text=str(data))
 
 
-async def set_event_handle(request: web.Request) -> web.StreamResponse:
+async def set_event_handle(request: web.Request) -> web.Response:
     try:
         name = request.match_info["name"]
     except KeyError as exc:
@@ -116,7 +125,7 @@ async def set_event_handle(request: web.Request) -> web.StreamResponse:
     return web.Response(text=str(data))
 
 
-async def set_outdoor_handle(request: web.Request) -> web.StreamResponse:
+async def set_outdoor_handle(request: web.Request) -> web.Response:
     try:
         humidity = int(request.rel_url.query["humidity"])
         temperature = int(request.rel_url.query["temperature"])
@@ -136,7 +145,7 @@ async def set_outdoor_handle(request: web.Request) -> web.StreamResponse:
     return web.Response(text=str(data))
 
 
-async def set_sinsts_handle(request: web.Request) -> web.StreamResponse:
+async def set_sinsts_handle(request: web.Request) -> web.Response:
     try:
         value = int(request.rel_url.query["value"])
     except KeyError as exc:
@@ -154,7 +163,7 @@ async def set_sinsts_handle(request: web.Request) -> web.StreamResponse:
     return web.Response(text=str(data))
 
 
-async def set_temperature_humidity_handle(request: web.Request) -> web.StreamResponse:
+async def set_temperature_humidity_handle(request: web.Request) -> web.Response:
     try:
         device = request.rel_url.query["device"]
         humidity = int(request.rel_url.query["humidity"])
@@ -212,7 +221,7 @@ async def datetime_handle(request: web.Request) -> web.Response:
     return web.json_response(data)
 
 
-async def sinsts_image_handle(request: web.Request) -> web.StreamResponse:
+async def sinsts_image_handle(request: web.Request) -> web.Response:
     try:
         data = await plot_sinsts()
         return web.Response(body=data, content_type="image/png")
@@ -220,7 +229,7 @@ async def sinsts_image_handle(request: web.Request) -> web.StreamResponse:
         return web.HTTPInternalServerError(reason=str(exc))
 
 
-async def pressure_image_handle(request: web.Request) -> web.StreamResponse:
+async def pressure_image_handle(request: web.Request) -> web.Response:
     try:
         device = config.atmospheric_pressure
         data = await plot_pressure(device.min, device.max)
@@ -229,7 +238,7 @@ async def pressure_image_handle(request: web.Request) -> web.StreamResponse:
         return web.HTTPInternalServerError(reason=str(exc))
 
 
-async def temperature_humidity_image_handle(request: web.Request) -> web.StreamResponse:
+async def temperature_humidity_image_handle(request: web.Request) -> web.Response:
     try:
         name = request.match_info["name"]
     except KeyError:

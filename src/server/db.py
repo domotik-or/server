@@ -21,7 +21,8 @@ async def create_tables():
     await _conn.execute(
         "CREATE TABLE IF NOT EXISTS east ("
         "    value INTEGER,"
-        "    timestamp TIMESTAMP(1) DEFAULT (STRFTIME('%s', 'NOW'))"
+        "    month INTEGER,"
+        "    year INTEGER,"
         ");"
     )
 
@@ -109,7 +110,7 @@ async def get_sinsts_records(
 
 _event_query = (
     "SELECT * FROM event "
-    "WHERE device=$1 AND timestamp >= ? AND timestamp <= ? "
+    "WHERE device=? AND timestamp >= ? AND timestamp <= ? "
     "ORDER BY timestamp;"
 )
 
