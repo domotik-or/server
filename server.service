@@ -2,14 +2,13 @@
 Description=Server
 StartLimitIntervalSec=300
 StartLimitBurst=5
-After=automations.service
 
 [Service]
-WorkingDirectory=/home/domotik
+WorkingDirectory=/home/franck/domotique/server
 # Environment=""
-ExecStart=/home/domotik/.local/bin/server -c /home/domotik/.config/domotik/server.toml
-User=domotik
-Group=domotik
+ExecStart=/home/franck/domotique/server/.venv/bin/server -c /home/franck/domotique/server/config.toml
+User=franck
+Group=franck
 Restart=on-failure
 RestartSec=10s
 KillSignal=SIGINT
